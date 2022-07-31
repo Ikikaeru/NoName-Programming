@@ -1,0 +1,66 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    background-color: rgb(17, 17, 17);
+    color: rgb(236, 236, 236);
+}
+h1 {
+    margin-top: 5px;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+h2 {
+    margin-left: 20px;
+    margin-bottom: 7px;
+}
+.userOutput {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 15px;
+    border: solid 1px rgb(236, 236, 236);
+    background-color: rgb(17, 17, 17);
+    color: rgb(236, 236, 236);
+}
+.errorOutput {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-left: 20px;
+    margin-right: 20px;
+    border: solid 1px rgb(236, 236, 236);
+    color: rgb(255, 0, 0);
+    background-color: rgb(17, 17, 17);
+}
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    margin-top: 3px;
+}
+#userInput {
+    width: calc(100% - 60px); /* Minus (.userInput horizontal margin + #userInput horizontal padding) */
+    height: 500px;
+    margin-left: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    background-color: rgb(17, 17, 17);
+    color: rgb(236, 236, 236);
+    border: solid 1px rgb(236, 236, 236);
+    overflow: auto;
+    outline: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    resize: none;
+}
+.object {
+    color: rgb(37, 212, 75);
+}
