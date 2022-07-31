@@ -293,7 +293,7 @@ const blockNestedPatterns = new BasicPattern({
                     line: line,
                     character: maxIndex - lastBeginLineChar - 1
                 };
-            }
+            };
             let getLineData = lineData(txt, index);
             let charPosDenom = getLineData.character % 10;
             let denom = 'th';
@@ -356,14 +356,57 @@ const separateNodes = (nodes, depth = 0) => {
     }
     return toShow;
 };
-
+const highlight = (nodes, depth = 0) => {
+    let toShow = '';
+    for(let node of nodes) // Checking node by node
+    {
+        if(typeof node[1] === 'object') // This node is a sub element (an array if nothing goes wrong)
+        {
+            toShow = `${toShow}${highlight(node[1], depth + 1)}`;
+        }
+        else // It's a string, ez pz let's write it with some spacing
+        {
+            switch(node[1])
+            {
+                case 'Hello':
+                    toShow = `${toShow}<span style="color: #a1a1a1;">${node[1]}</span>`;
+                    break;
+                default:
+                    toShow = `${toShow}${node[1]}`;
+                    break;
+            }
+        }
+    }
+    return toShow;
+}
 
 function fastInput()
 {
-    let userInput = document.getElementById('userInput').value;
+    const countLines = (content) => {
+        let line = 1;
+        for(let i = 0; i < content.length; i++)
+        {
+            if(content[i] === '\n')
+            {
+                line++;
+            }
+        }
+        return line;
+    }
+    const generateLines = (n) => {
+        let result = '';
+        for(let i = 1; i <= n; i++)
+        {
+            result = `${result}<p>${i}</p>\n`;
+        }
+        return result;
+    }
+    let userInput = document.getElementById('userInput');
+    let editNLines = document.querySelector('.editor_linenumber');
+    editNLines.innerHTML = generateLines(countLines(userInput.value));
     let output = document.querySelector('.userOutput');
     let userLog = document.querySelector('.errorOutput');
-    let subdivided = LookForPattern(userInput, AllBasicPatterns);
+    let subdivided = LookForPattern(userInput.value, AllBasicPatterns);
     let packLogs = '';
     for(let log of logs)
     {
@@ -375,10 +418,33 @@ function fastInput()
     }
     userLog.innerHTML = `<pre>${packLogs}</pre>`;
     output.innerHTML = `<pre>${separateNodes(subdivided.result)}</pre>`;
+    let clone = document.getElementById('cloneInput');
+    clone.innerHTML = highlight(subdivided.result);
 }
 fastInput();
 
 let userInput = document.getElementById('userInput');
+userInput.addEventListener('keypress', (e) => {
+    fastInput();
+});
 userInput.addEventListener('keyup', (e) => {
     fastInput();
-})
+});
+userInput.addEventListener('keydown', (e) => {
+    fastInput();
+});
+
+setInterval(() => {
+    scrollThread();
+}, 1000 / 60);
+
+function scrollThread()
+{
+    let userInput = document.getElementById('userInput');
+    let backdrop = document.getElementById('cloneInput');
+    let editNLines = document.querySelector('.editor_linenumber');
+    backdrop.scroll(userInput.scrollLeft, userInput.scrollTop);
+    editNLines.scroll(userInput.scrollLeft, userInput.scrollTop);
+    userInput.scroll(userInput.scrollLeft, userInput.scrollTop);
+}
+
