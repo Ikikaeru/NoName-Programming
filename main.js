@@ -371,6 +371,9 @@ const highlight = (nodes, depth = 0) => {
                 case 'Hello':
                     toShow = `${toShow}<span style="color: #a1a1a1;">${node[1]}</span>`;
                     break;
+                case '\n':
+                    toShow = `${toShow}\n‪`;
+                    break;
                 default:
                     toShow = `${toShow}${node[1]}`;
                     break;
@@ -402,6 +405,26 @@ function fastInput()
         return result;
     }
     let userInput = document.getElementById('userInput');
+    const rectifyLines = (content) =>  {
+        let rectifiedContent = '';
+        const maxWidth = 180;
+        let actualWidth = 0;
+        for(let i = 0; i < content.length; i++)
+        {
+            actualWidth++;
+            if(content[i] === '\n')
+            {
+                actualWidth = 1;
+            }
+            if(actualWidth % maxWidth == 0)
+            {
+                rectifiedContent = `${rectifiedContent}\n`;
+            }
+            rectifiedContent = `${rectifiedContent}${content[i]}`;
+        }
+        return rectifiedContent;
+    };
+    userInput.value = rectifyLines(userInput.value);
     let editNLines = document.querySelector('.editor_linenumber');
     editNLines.innerHTML = generateLines(countLines(userInput.value));
     let output = document.querySelector('.userOutput');

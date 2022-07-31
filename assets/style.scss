@@ -42,10 +42,17 @@ h1 {
     display: flex;
     flex-direction: row;
     width: calc(100% - 40px);
-    height: 600px;
+    height: 35 * 18px;
     margin: auto;
     border: solid 1px rgb(236, 236, 236);
     font-family: monospace;
+    background: repeating-linear-gradient(
+        to bottom,
+        #1b1b1b 0px,
+        #1b1b1b 18px,
+        #272727 18px,
+        #272727 2 * 18px
+    );
     &_linenumber {
         font-family: 'Courier New', Courier, monospace;
         font-size: medium;
@@ -59,8 +66,12 @@ h1 {
 }
 .container {
     width: 100%;
-    .backdrop, textarea {
-        width: calc(100% - 60px);
+    textarea {
+        width: calc(100% - 85px);
+        height: 100%;
+    }
+    .backdrop {
+        width: calc(100% - 95px);
         height: 100%;
     }
 }
@@ -76,12 +87,12 @@ h1 {
     border-radius: 0;
     height: 100%;
     overflow: hidden;
+    margin-left: -10px;
 }
 #userInput {
     font-family: 'Courier New', Courier, monospace;
     font-size: medium;
     display: block;
-    width: calc(100% - 60px);
     height: 100%;
     position: absolute;
     z-index: 1;
@@ -90,19 +101,24 @@ h1 {
     background-color: transparent;
     caret-color: rgba(236, 236, 236, 1.0);
     resize: none;
+    border: none;
     white-space: pre-wrap;
     word-wrap: break-word;
     color: transparent;
     overflow-y: scroll;
+    margin-left: 10px;
+    right: 0;
+    border-color: transparent;
 }
 .backdrop {
     position: absolute;
     z-index: 2;
     caret-color: rgb(236, 236, 236);
-    width: calc(100% - 60px);
+    padding-left: 20px;
     pointer-events: none;
     background-color: transparent;
     overflow: hidden;
+    right: 0;
 }
 
 .highlights {
