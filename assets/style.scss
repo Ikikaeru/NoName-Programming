@@ -41,7 +41,7 @@ h1 {
     position: relative;
     display: flex;
     flex-direction: row;
-    width: calc(100% - 40px);
+    width: 1865px;
     height: 35 * 18px;
     margin: auto;
     border: solid 1px rgb(236, 236, 236);
@@ -65,7 +65,7 @@ h1 {
     }
 }
 .container {
-    width: 100%;
+    width: 1865px;
     textarea {
         width: calc(100% - 85px);
         height: 100%;
