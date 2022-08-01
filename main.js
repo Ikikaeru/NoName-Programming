@@ -501,22 +501,15 @@ function fastInput()
     let clone = document.getElementById('cloneInput');
     clone.innerHTML = highlight(subdivided.result);
 }
+
 fastInput();
-
 let userInput = document.getElementById('userInput');
-userInput.addEventListener('keypress', (e) => {
+userInput.addEventListener('input', (e) => {
     fastInput();
 });
-userInput.addEventListener('keyup', (e) => {
-    fastInput();
-});
-userInput.addEventListener('keydown', (e) => {
-    fastInput();
-});
-
-setInterval(() => {
+userInput.addEventListener('scroll', (e) => {
     scrollThread();
-}, 1000 / 60);
+});
 
 function scrollThread()
 {
