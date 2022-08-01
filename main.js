@@ -415,7 +415,7 @@ const highlight = (nodes, depth = 0) => {
                     toShow = `${toShow}<span style="color: #a1a1a1;">${node[2]}</span>`;
                     break;
                 case '\n':
-                    toShow = `${toShow}\n‪`;
+                    toShow = `${toShow}\n`;//‪
                     break;
                 default:
                     toShow = `${toShow}${node[2]}`;
@@ -457,7 +457,7 @@ function fastInput()
         let result = '';
         for(let i = 1; i <= n; i++)
         {
-            result = `${result}<p>${i}</p>\n`;
+            result = `${result}<p>${i}</p>`;
         }
         return result;
     }
