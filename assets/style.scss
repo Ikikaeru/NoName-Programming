@@ -3,9 +3,92 @@
     padding: 0;
 }
 body {
+    font-family: 'Courier New', Courier, monospace;
     background-color: rgb(17, 17, 17);
     color: rgb(236, 236, 236);
 }
+.editor > .editor_linenumber > p {
+    width: 60px;
+}
+.editor {
+    display: flex;
+    flex-direction: row;
+    overflow-y: scroll;
+    &_linenumber {
+        width: 60px;
+        max-height: 630px; // 35 * 18px
+        min-width: 60px;
+        max-width: 60px;
+        text-align: right;
+        p {
+            padding-right: 5px;
+            background-color: #272727;
+        }
+        p:nth-child(2n) {
+            background-color: #1b1b1b;
+        }
+    }
+    &_container {
+        position: relative;
+        margin-left: 5px;
+        min-width: 500px;
+        width: 100%;
+        &_inputarea {
+            padding-left: 5px;
+            display: inline-block;
+            width: calc(100% - 5px);
+            position: absolute;
+            z-index: 2;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: medium;
+            resize: none;
+            border: none;
+            white-space: nowrap;
+            color: transparent;
+            background-color: transparent;
+            caret-color: rgb(236, 236, 236);
+            overflow-y: hidden;
+            overflow-x: visible;
+            &:focus {
+                outline: none;
+            }
+        }
+        &_backdrop {
+            padding-left: 5px;
+            position: absolute;
+            width: calc(100% - 5px);
+            z-index: 1;
+            white-space: nowrap;
+            font-size: medium;
+            overflow: hidden;
+        }
+    }
+}
+/*
+#userInput {
+    font-size: medium;
+    display: block;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    border-radius: 0;
+    background-color: transparent;
+    caret-color: rgba(236, 236, 236, 1.0);
+    resize: none;
+    border: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: transparent;
+    overflow-y: scroll;
+    right: 0;
+    //color: rgba(236, 236, 236, 0.5);
+    //border-color: transparent;
+}
+*/
+
+
+/*
 h1, h2 {
     margin-left: 20px;
     margin-bottom: 7px;
@@ -13,7 +96,6 @@ h1, h2 {
 h1 {
     margin-top: 5px;
 }
-
 .userOutput, .errorOutput {
     padding-left: 10px;
     padding-right: 10px;
@@ -150,4 +232,4 @@ h1 {
 
 #userInput:focus {
     outline: none;
-}
+}*/

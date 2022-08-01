@@ -481,11 +481,11 @@ function fastInput()
         }
         return rectifiedContent;
     };
-    userInput.value = rectifyLines(userInput.value);
+    //userInput.value = rectifyLines(userInput.value);
     let editNLines = document.querySelector('.editor_linenumber');
-    editNLines.innerHTML = generateLines(countLines(userInput.value));
-    let output = document.querySelector('.userOutput');
-    let userLog = document.querySelector('.errorOutput');
+    editNLines.innerHTML = generateLines(Math.max(countLines(userInput.value), 35));
+    //let output = document.querySelector('.userOutput');
+    //let userLog = document.querySelector('.errorOutput');
     let subdivided = LookForPattern(userInput.value, AllBasicPatterns);
     let packLogs = '';
     for(let log of logs)
@@ -496,8 +496,8 @@ function fastInput()
     {
         logs.pop();
     }
-    userLog.innerHTML = `<pre>${packLogs}</pre>`;
-    output.innerHTML = `<pre>${separateNodes(subdivided.result)}</pre>`;
+    //userLog.innerHTML = `<pre>${packLogs}</pre>`;
+    //output.innerHTML = `<pre>${separateNodes(subdivided.result)}</pre>`;
     let clone = document.getElementById('cloneInput');
     clone.innerHTML = highlight(subdivided.result);
 }
@@ -521,3 +521,8 @@ function scrollThread()
     userInput.scroll(userInput.scrollLeft, userInput.scrollTop);
 }
 
+function textAreaAdjust(element)
+{
+    element.style.height = "1px";
+    element.style.height = `${element.scrollHeight}px`;
+}
