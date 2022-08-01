@@ -391,7 +391,6 @@ const highlight = (nodes, depth = 0) => {
     let toShow = '';
     for(let node of nodes) // Checking node by node
     {
-        console.log(node);
         if(typeof node[1] === 'object' || node[2] === undefined) // This node is a sub element (an array if nothing goes wrong)
         {
             if(node[2] === undefined)
@@ -424,7 +423,21 @@ const highlight = (nodes, depth = 0) => {
             }
         }
     }
-    return toShow;
+    let lastLineIndex = 0;
+    let remakeShow = '';
+    // Since we now have the content, let's make it HTML friendly
+    for(let i = 0; i < toShow.length; i++)
+    {
+        if(toShow[i] === '\n')
+        {
+            // SecondLine - FirstLine
+            let content = Txt.extract(toShow, lastLineIndex, i - lastLineIndex);
+            remakeShow = `${remakeShow}<p>${content}</p>`;
+            lastLineIndex = i + 1;
+        }
+    }
+    remakeShow = `${remakeShow}<p>${Txt.extract(toShow, lastLineIndex, toShow.length - lastLineIndex)}</p>`;
+    return remakeShow;
 }
 
 function fastInput()
