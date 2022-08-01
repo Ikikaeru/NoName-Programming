@@ -29,6 +29,7 @@ class BasicPattern
         this.isPattern = pattern.isPattern;
         this.isPatternEnd = pattern.isPatternEnd;
         this.fetch = pattern.fetch;
+        this.stringContent = pattern.stringContent;
     }
     /**
      * Check if we found the pattern.
@@ -79,6 +80,14 @@ class BasicPattern
             lastIndex: i,
             content: this.defaultValue
         };
+    }
+    getString()
+    {
+        if(this.stringContent !== undefined && this.stringContent !== null)
+        {
+            return this.stringContent;
+        }
+        return '';
     }
 }
 /**
@@ -138,7 +147,7 @@ function LookForPattern(txtContent, patternSet, i = 0, endPattern = (i, c, t) =>
             {
                 let fetchResult = patternSet[j].fetchContent(i, txtContent[i], txtContent, patternSet, patternSet[j]); // Execute something then return the fetched result
                 i = fetchResult.lastIndex; // Assign the new index
-                subdivided.push([patternSet[j].name, fetchResult.content]); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
+                subdivided.push([patternSet[j].name, fetchResult.content, fetchResult.stringContent]); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
                 break; // No need to check more pattern, we've got one already
             }
         }
@@ -163,6 +172,7 @@ const numbersBasicPattern = new BasicPattern({
     fetch: (index, c, txt) => {
         let result = {
             content: '',
+            stringContent: '',
             lastIndex: index
         };
         let alreadyDecimal = false;
@@ -191,6 +201,7 @@ const numbersBasicPattern = new BasicPattern({
             result.content = `${result.content}${txt[i]}`;
         }
         result.content = Number(result.content); // Type hack
+        result.stringContent = `${result.content}`;
         return result;
     }
 });
@@ -201,6 +212,7 @@ const wordsBasicPattern = new BasicPattern({
     fetch: (index, c, txt) => {
         let result = {
             content: '',
+            stringContent: '',
             lastIndex: index
         };
         for(let i = index; i < txt.length; i++)
@@ -212,6 +224,7 @@ const wordsBasicPattern = new BasicPattern({
             }
             result.lastIndex = i; // Assign the last index
             result.content = `${result.content}${txt[i]}`;
+            result.stringContent = result.content;
         }
         return result;
     }
@@ -223,6 +236,7 @@ const punctuationsBasicPattern = new BasicPattern({
     fetch: (index, c, txt) => {
         return {
             content: c,
+            stringContent: c,
             lastIndex: index
         };
     }
@@ -234,6 +248,7 @@ const symbolsBasicPattern = new BasicPattern({
     fetch: (index, c, txt) => {
         return {
             content: c,
+            stringContent: c,
             lastIndex: index
         };
     }
@@ -245,6 +260,7 @@ const whitespacesBasicPattern = new BasicPattern({
     fetch: (index, c, txt) => {
         return {
             content: c,
+            stringContent: c,
             lastIndex: index
         };
     }
@@ -256,6 +272,7 @@ const controlsBasicPattern = new BasicPattern({
     fetch: (index, c, txt) => {
         return {
             content: c,
+            stringContent: c,
             lastIndex: index
         };
     }
@@ -272,6 +289,7 @@ const blockNestedPatterns = new BasicPattern({
         {
             return {
                 content: p.result,
+                stringContent: `{${p.result}}`,
                 lastIndex: p.lastIndex
             }; // Return what we got
         }
@@ -321,6 +339,18 @@ const blockNestedPatterns = new BasicPattern({
         }
     }
 });
+const unknownPatterns = new BasicPattern({
+    name: 'Unknown',
+    defaultValue: '',
+    isPattern: (i, c, txt) => { return true; },
+    fetch: (index, c, txt) => {
+        return {
+            content: c,
+            stringContent: c,
+            lastIndex: index
+        };
+    }
+});
 
 const AllBasicPatterns = [ // A list of all the showcases pattern, just to make things simpler
     blockNestedPatterns,
@@ -329,7 +359,8 @@ const AllBasicPatterns = [ // A list of all the showcases pattern, just to make 
     punctuationsBasicPattern,
     symbolsBasicPattern,
     whitespacesBasicPattern,
-    controlsBasicPattern
+    controlsBasicPattern,
+    unknownPatterns
 ];
 
 // A string generator to see our node hierarchy
@@ -360,22 +391,35 @@ const highlight = (nodes, depth = 0) => {
     let toShow = '';
     for(let node of nodes) // Checking node by node
     {
-        if(typeof node[1] === 'object') // This node is a sub element (an array if nothing goes wrong)
+        console.log(node);
+        if(typeof node[1] === 'object' || node[2] === undefined) // This node is a sub element (an array if nothing goes wrong)
         {
-            toShow = `${toShow}${highlight(node[1], depth + 1)}`;
+            if(node[2] === undefined)
+            {
+                switch(node[0])
+                {
+                    case 'Curly Brackets':
+                        toShow = `${toShow}{`;
+                        break;
+                }
+            }
+            else
+            {
+                toShow = `${toShow}{${highlight(node[1], depth + 1)}}`;
+            }
         }
         else // It's a string, ez pz let's write it with some spacing
         {
             switch(node[1])
             {
                 case 'Hello':
-                    toShow = `${toShow}<span style="color: #a1a1a1;">${node[1]}</span>`;
+                    toShow = `${toShow}<span style="color: #a1a1a1;">${node[2]}</span>`;
                     break;
                 case '\n':
                     toShow = `${toShow}\n‪`;
                     break;
                 default:
-                    toShow = `${toShow}${node[1]}`;
+                    toShow = `${toShow}${node[2]}`;
                     break;
             }
         }
