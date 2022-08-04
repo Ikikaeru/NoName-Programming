@@ -1,5 +1,5 @@
-const controls = [ '\n', '\t' ];
-const whitespaces = [' ', '\t' ];
+const controls = [ '\n' ];
+const whitespaces = [ ' ', '\t' ];
 const symbols = [ '§', '@', '¥', '€', '¬', '&', '|', '#', '^', '*', '$', '%', '±', '=', '+', '-', '*', '/', '\\', '<', '>', '~', '°', '_', '`', '´', '¨', '(', ')', '[', ']', '{', '}' ];
 const punctuations = [ '.', ',', ';', ':', '?', '!', '"', '\'', '«', '»' ];
 const letters = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -12,121 +12,25 @@ const letters = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 
                     'Ç', 'ç'
 ];
 const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-/**
- * BasicPattern is a generic class made to check for pattern while looking inside a string.
- * It fetch it's inner value with the pattern founded and then return it's last index.
- */
-class BasicPattern
-{
-    /**
-     * Create a basic pattern object with a bunch of parameters for full customisation.
-     * @param {{name: string, defaultValue: any, isPattern: (i: number, c: char, t: string) => boolean, isPatternEnd: (i: number, c: char, t: string) => boolean, fetch: (i: number, c: char, t: string) => {lastIndex: number, content: any}} pattern 
-     */
-    constructor(pattern)
-    {
-        this.name = pattern.name;
-        this.defaultValue = pattern.defaultValue;
-        this.isPattern = pattern.isPattern;
-        this.isPatternEnd = pattern.isPatternEnd;
-        this.fetch = pattern.fetch;
-        this.stringContent = pattern.stringContent;
-    }
-    /**
-     * Check if we found the pattern.
-     * @param {number} i The actual index tested.
-     * @param {char} c The actual character tested.
-     * @param {string} t The actual text content parsed for special cases.
-     * @returns True only if it match the pattern.
-     */
-    isActualPattern(i, c, t)
-    {
-        if(this.isPattern !== undefined && this.isPattern !== null)
-        {
-            return this.isPattern(i, c, t);
-        }
-        return false;
-    }
-    /**
-     * Check if the pattern ended, used to handle nesting.
-     * @param {number} i The actual index tested.
-     * @param {char} c The actual character tested.
-     * @param {string} t The actual text content parsed for special cases.
-     * @returns True only if it match the pattern.
-     */
-    isEndPattern(i, c, t)
-    {
-        if(this.isPatternEnd !== undefined && this.isPatternEnd !== null)
-        {
-            return this.isPatternEnd(i, c, t);
-        }
-        return false;
-    }
-    /**
-     * Assign the new content matching the desired pattern then return the last index of the pattern.
-     * @param {number} i The actual index tested.
-     * @param {char} c The actual character tested.
-     * @param {string} t The actual text content parsed for special cases.
-     * @param {BasicPattern[]} patternSet The actual text content parsed for special cases.
-     * @param {string} actualPattern The actual pattern we're testing, used for referencing.
-     * @returns An object containing the last index of the pattern and the content to fetch. Content is equal to the default value in case fetch isn't defined.
-     */
-    fetchContent(i, c, t, patternSet, actualPattern)
-    {
-        if(this.fetch !== undefined && this.fetch !== null)
-        {
-            return this.fetch(i, c, t, actualPattern.isPatternEnd, patternSet);
-        }
-        return {
-            lastIndex: i,
-            content: this.defaultValue
-        };
-    }
-    getString()
-    {
-        if(this.stringContent !== undefined && this.stringContent !== null)
-        {
-            return this.stringContent;
-        }
-        return '';
-    }
-}
-/**
- * Shorthand static class for special string functions.
- */
-class Txt
-{
-    /**
-     * A shorthand function to extract a certain number of character from a string. 
-     * @param {string} content The string where we want to extract content from.
-     * @param {number} index The index from which we start.
-     * @param {number} nbrLetters The number of letters to extract.
-     * @returns Return a string of nbrLetters characters if there is that many from a starting point.
-     */
-    static extract(content, index, nbrLetters)
-    {
-       let result = '';
-       for(let i = index; i < content.length; i++)
-       {
-           if(i >= index + nbrLetters)
-           {
-               return result;
-           }
-           result = `${result}${content[i]}`;
-       }
-       return result;
-   }
-}
-
-
+const KEYWORDS = [  'let', 'new', 'from', 'to', 'static', 'in', 'as', 'do',
+                    'inside', 'select', 'set', 'get', 'insert', 'delete',
+                    'define', 'function', 'value', 'use', 'public', 'private',
+                    'protected', 'readonly', 'import', 'export', 'namespace'
+];
+const LOGICS = [    'for', 'foreach', 'while', 'if', 'switch', 'try', 'catch', 'finaly'
+];
+const LOGIC_CONTROLS = [    'return', 'break', 'continue'
+];
 const logs = [];
-/**
- * A function made to look for specific pattern
- * @param {string} txtContent The string we're currently parsing.
- * @param {BasicPattern[]} patternSet A list of different pattern to compute.
- * @param {number} i The index with default value to 0. Can be modified for nested searching.
- * @param {(index: number, c: char, text: string) => boolean} endPattern A function to check if a pattern ended.
- * @return {{isPatternEnd: boolean, result: [name:string, content:any], lastIndex: number}} Return an object representing the value parsed.
- */
+
+ /**
+  * A function made to look for specific pattern
+  * @param {string} txtContent The string we're currently parsing.
+  * @param {BasicPattern[]} patternSet A list of different pattern to compute.
+  * @param {number} i The index with default value to 0. Can be modified for nested searching.
+  * @param {(index: number, c: char, text: string) => boolean} endPattern A function to check if a pattern ended.
+  * @return {{isPatternEnd: boolean, result: {name:string, content:any}[], lastIndex: number}} Return an object representing the value parsed.
+  */
 function LookForPattern(txtContent, patternSet, i = 0, endPattern = (i, c, t) => { return false; })
 {
     let subdivided = []; // A result called subdivided since it's the input subdivided in multiple pieces.
@@ -147,7 +51,14 @@ function LookForPattern(txtContent, patternSet, i = 0, endPattern = (i, c, t) =>
             {
                 let fetchResult = patternSet[j].fetchContent(i, txtContent[i], txtContent, patternSet, patternSet[j]); // Execute something then return the fetched result
                 i = fetchResult.lastIndex; // Assign the new index
-                subdivided.push([patternSet[j].name, fetchResult.content, fetchResult.stringContent]); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
+                subdivided.push({
+                    begin: fetchResult.begin,
+                    end: fetchResult.end,
+                    nested: fetchResult.nested,
+                    error: fetchResult.error,
+                    name: patternSet[j].name,
+                    content: fetchResult.content
+                }); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
                 break; // No need to check more pattern, we've got one already
             }
         }
@@ -160,286 +71,240 @@ function LookForPattern(txtContent, patternSet, i = 0, endPattern = (i, c, t) =>
 }
 
 /*
-    A BUNCH OF SHOWCASES OF BASIC PATTERN
+    PATTERNS
 */
-const numbersBasicPattern = new BasicPattern({
-    name: 'Number',
-    defaultValue: 0,
-    isPattern: (i, c, txt) => {
-        let isDecimal = c === '.' && digits.includes(Txt.extract(txt, i + 1, 1));
-        return digits.includes(c) || isDecimal;
-    },
-    fetch: (index, c, txt) => {
-        let result = {
-            content: '',
-            stringContent: '',
-            lastIndex: index
-        };
-        let alreadyDecimal = false;
-        for(let i = index; i < txt.length; i++)
-        {
-            if(!digits.includes(txt[i])) // Not a digit?
+const AllBasicPatterns = [
+    new BasicPattern({ name: 'Comment Line', defaultValue: '//',
+        isPattern: (i, c, txt) => { return c === '/' && i + 1 < txt.length && txt[i + 1] === '/'; },
+        fetch: (index, c, txt) => {
+            let result = '//';
+            let lastIndex = index;
+            for(let i = index + 2; i < txt.length; i++)
             {
-                if(!alreadyDecimal && txt[i] === '.') // It's decimal number
+                result = `${result}${txt[i]}`;
+                lastIndex = i;
+                if(txt[i] === '\n')
                 {
-                    alreadyDecimal = true; // We defined it as decimal to skip problems in case of multiple decimal marks
-                    if(result.content.length == 0) // .5 as example
-                    {
-                        result.content = `0.`; // 0.5 now
-                    }
-                    else
-                    {
-                        result.content = `${result.content}.`; // xxx.yyy
-                    }
-                    result.lastIndex = i; // Assign the last index
-                    continue;
+                    break;
                 }
-                result.lastIndex = i - 1; // Since this index is something we shouldn't bother with, let him tested by something else
-                break;
             }
-            result.lastIndex = i; // Assign the last index
-            result.content = `${result.content}${txt[i]}`;
-        }
-        result.content = Number(result.content); // Type hack
-        result.stringContent = `${result.content}`;
-        return result;
-    }
-});
-const wordsBasicPattern = new BasicPattern({
-    name: 'Word',
-    defaultValue: '',
-    isPattern: (i, c, txt) => { return letters.includes(c); },
-    fetch: (index, c, txt) => {
-        let result = {
-            content: '',
-            stringContent: '',
-            lastIndex: index
-        };
-        for(let i = index; i < txt.length; i++)
-        {
-            if(!letters.includes(txt[i])) // Not a letter?
-            {
-                result.lastIndex = i - 1; // Since this index is something we shouldn't bother with, let him tested by something else
-                break;
-            }
-            result.lastIndex = i; // Assign the last index
-            result.content = `${result.content}${txt[i]}`;
-            result.stringContent = result.content;
-        }
-        return result;
-    }
-});
-const punctuationsBasicPattern = new BasicPattern({
-    name: 'Punctuation',
-    defaultValue: '',
-    isPattern: (i, c, txt) => { return punctuations.includes(c); },
-    fetch: (index, c, txt) => {
-        return {
-            content: c,
-            stringContent: c,
-            lastIndex: index
-        };
-    }
-});
-const symbolsBasicPattern = new BasicPattern({
-    name: 'Symbol',
-    defaultValue: '',
-    isPattern: (i, c, txt) => { return symbols.includes(c); },
-    fetch: (index, c, txt) => {
-        return {
-            content: c,
-            stringContent: c,
-            lastIndex: index
-        };
-    }
-});
-const whitespacesBasicPattern = new BasicPattern({
-    name: 'Whitespace',
-    defaultValue: '',
-    isPattern: (i, c, txt) => { return whitespaces.includes(c); },
-    fetch: (index, c, txt) => {
-        return {
-            content: c,
-            stringContent: c,
-            lastIndex: index
-        };
-    }
-});
-const controlsBasicPattern = new BasicPattern({
-    name: 'Controls',
-    defaultValue: '',
-    isPattern: (i, c, txt) => { return controls.includes(c); },
-    fetch: (index, c, txt) => {
-        return {
-            content: c,
-            stringContent: c,
-            lastIndex: index
-        };
-    }
-});
-const blockNestedPatterns = new BasicPattern({
-    name: 'Curly Brackets',
-    defaultValue: '{}',
-    isPattern: (i, c, txt) => { return c === '{'; },
-    isPatternEnd: (i, c, txt) => { return c === '}'; },
-    fetch: (index, c, txt, endPattern, patternSet) => {
-        let p = LookForPattern(txt, patternSet, index + 1, endPattern); // Let's look for nested pattern over here..
-        // We could filter patternSet if we wanted to get rid of some functions for this case or use whatever we want anyway.
-        if(p.isPatternEnd) // It's the end of our pattern
-        {
             return {
-                content: p.result,
-                stringContent: `{${p.result}}`,
-                lastIndex: p.lastIndex
-            }; // Return what we got
-        }
-        else // Something went wrong with brackets (user input) since it was never closed.
-        {
-            const lineData = (content, maxIndex) => {
-                maxIndex++;
-                let line = 1;
-                let lastBeginLineChar = -1;
-                for(let i = 0; i < maxIndex; i++)
-                {
-                    if(content[i] === '\n')
-                    {
-                        lastBeginLineChar = i;
-                        line++;
-                    }
-                }
-                return {
-                    line: line,
-                    character: maxIndex - lastBeginLineChar - 1
-                };
+                content: result,
+                lastIndex: lastIndex
             };
-            let getLineData = lineData(txt, index);
-            let charPosDenom = getLineData.character % 10;
-            let denom = 'th';
-            switch(charPosDenom)
+        }
+    }),
+    new BasicPattern({ name: 'Comment Multiline', defaultValue: '/*',
+    isPattern: (i, c, txt) => { return txt[i] === '/' && i + 1 < txt.length && txt[i + 1] === '*'; },
+    fetch: (index, c, txt) => {
+        let result = '/*';
+        let lastIndex = index + 1;
+        for(let i = index + 2; i < txt.length; i++)
+        {
+            result = `${result}${txt[i]}`;
+            lastIndex = i;
+            if(txt[i] === '/' && i - 1 >= 0 && txt[i - 1] === '*')
             {
-                case 1:
-                    denom = 'st';
-                    break;
-                case 2:
-                    denom = 'nd';
-                    break;
-                case 3:
-                    denom = 'rd';
-                    break;
+                break;
             }
-            let errorMsg = `<strong><em>Curly brackets</em></strong> at line ${getLineData.line}, the <strong>${getLineData.character}${denom}</strong> character: the <em>curly brackets</em> is never closed.`;
-            if(!logs.includes(errorMsg))
-            {
-                logs.push(errorMsg);
-            }
+        }
+        // If we're out of bounds but found no closing 
+        if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '/' && txt[txt.length - 2] !== '*')
+        {
             return {
-                content: '',
+                error: true,
+                content: '/*',
+                lastIndex: index + 1
+            };
+        }
+        return {
+            content: result,
+            lastIndex: lastIndex
+        };
+    }
+}),
+new BasicPattern({ name: 'String Classic', defaultValue: '\'',
+    isPattern: (i, c, txt) => { return c === '\''; },
+    fetch: (index, c, txt) => {
+        let result = '\'';
+        let lastIndex = index;
+        for(let i = index + 1; i < txt.length; i++)
+        {
+            result = `${result}${txt[i]}`;
+            lastIndex = i;
+            if(txt[i] === '\'' && txt[i - 1] !== '\\')
+            {
+                break;
+            }
+        }
+        // If we're out of bounds but found no closing '
+        if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '\'')
+        {
+            return {
+                error: true,
+                content: '\'',
                 lastIndex: index
             };
         }
-    }
-});
-const unknownPatterns = new BasicPattern({
-    name: 'Unknown',
-    defaultValue: '',
-    isPattern: (i, c, txt) => { return true; },
-    fetch: (index, c, txt) => {
         return {
-            content: c,
-            stringContent: c,
-            lastIndex: index
+            content: result,
+            lastIndex: lastIndex
         };
     }
-});
-
-const AllBasicPatterns = [ // A list of all the showcases pattern, just to make things simpler
-    blockNestedPatterns,
-    numbersBasicPattern,
-    wordsBasicPattern,
-    punctuationsBasicPattern,
-    symbolsBasicPattern,
-    whitespacesBasicPattern,
-    controlsBasicPattern,
-    unknownPatterns
-];
-
-// A string generator to see our node hierarchy
-const separateNodes = (nodes, depth = 0) => {
-    const generateRepeat = (n, r) => { // Generate a repeted amount of letter for spacing
-        let space = '';
-        for(let i = 0; i < n; i++)
-        {
-            space = `${space}${r}`;
+}),
+    BasicPattern.simpleCharbox('Parenthesis', '(', ')'),
+    BasicPattern.simpleCharbox('Bracket', '[', ']'),
+    BasicPattern.simpleCharbox('Curly Bracket', '{', '}'),
+    BasicPattern.number(),
+    BasicPattern.word(),
+    BasicPattern.simpleChar('Punctuation', (c) => { return punctuations.includes(c); }),
+    BasicPattern.simpleChar('Symbol', (c) => { return symbols.includes(c); }),
+    new BasicPattern({ name: 'Whitespaces', defaultValue: ' ',
+        isPattern: (i, c, txt) => { return whitespaces.includes(c); },
+        fetch: (index, c, txt) => {
+            let result = Txt.extractFromUntil(txt, index, (c) => {
+                return whitespaces.includes(c);
+            });
+            let spaceResult = result.value;
+            return {
+                content: spaceResult,
+                lastIndex: result.lastIndex
+            };
         }
-        return space;
-    };
-    let toShow = '';
-    for(let node of nodes) // Checking node by node
+    }),
+    BasicPattern.simpleChar('Controls', (c) => { return controls.includes(c); })
+];
+ 
+const navigateNodes = (nodes) => {
+    let result = '';
+    const HtmlEncode = (s) => {
+        let el = document.createElement("div");
+        el.innerText = el.textContent = s;
+        s = el.innerHTML;
+        return s;
+    }
+    for(let i = 0; i < nodes.length; i++)
     {
-        if(typeof node[1] === 'object') // This node is a sub element (an array if nothing goes wrong)
+        if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
         {
-            toShow = `${toShow}${generateRepeat(depth, '\t')}<em class='object'>${node[0]}</em>:\n${separateNodes(node[1], depth + 1)}`;
+            let encodeBegin = HtmlEncode(nodes[i].begin);
+            if(nodes[i].error) // An error occured, most likely a not closed block
+            {
+                result = `${result}<span class="error">${encodeBegin}</span>`;
+            }
+            else // No error occured
+            {
+                result = `${result}${encodeBegin}${navigateNodes(nodes[i].content)}${HtmlEncode(nodes[i].end)}`;
+            }
         }
         else // It's a string, ez pz let's write it with some spacing
         {
-            toShow = `${toShow}${generateRepeat(depth, '\t')}<em class='object'>${node[0]}</em>:\n${generateRepeat(depth + 1, '\t')}<strong>${node[1]}</strong>\n`;
-        }
-    }
-    return toShow;
-};
-const highlight = (nodes, depth = 0) => {
-    let toShow = '';
-    for(let node of nodes) // Checking node by node
-    {
-        if(typeof node[1] === 'object' || node[2] === undefined) // This node is a sub element (an array if nothing goes wrong)
-        {
-            if(node[2] === undefined)
+            if(nodes[i].name === 'Control' || nodes[i].content === '\n')
             {
-                switch(node[0])
+                result = `${result}${nodes[i].content}`;
+            }
+            else if(nodes[i].name === 'Whitespaces'
+            || nodes[i].name === 'String Classic'
+            || nodes[i].name === 'Comment Line'
+            || nodes[i].name === 'Comment Multiline')
+            {
+                if(nodes[i].error)
                 {
-                    case 'Curly Brackets':
-                        toShow = `${toShow}{`;
-                        break;
+                    result = `${result}<span class="error">${nodes[i].content.replaceAll(' ', '&nbsp;')}</span>`;
+                }
+                else
+                {
+                    switch(nodes[i].name)
+                    {
+                        case 'Comment Multiline':
+                            const formatText = (content) =>  {
+                                let rectifiedContent = '';
+                                for(let i = 0; i < content.length; i++)
+                                {
+                                    if(content[i] === '\n')
+                                    {
+                                        rectifiedContent = `${rectifiedContent}</span></p><p><span class="comment">`;
+                                    }
+                                    else
+                                    {
+                                        rectifiedContent = `${rectifiedContent}${content[i]}`;
+                                    }
+                                }
+                                return `${rectifiedContent}</span>`;
+                            };
+                            result = `${result}<span class="comment">${formatText(nodes[i].content.replaceAll(' ', '&nbsp;'))}</span>`;
+                            break;
+                        case 'Comment Line':
+                            result = `${result}<span class="comment">${nodes[i].content.replaceAll(' ', '&nbsp;')}</span>`;
+                            break;
+                        case 'String Classic':
+                            let oldContent = nodes[i].content;
+                            let newContent = '';
+                            let error = false;
+                            for(let i = 0; i < oldContent.length; i++)
+                            {
+                                if(oldContent[i] !== ' ' && oldContent[i] !== '\n')
+                                {
+                                    newContent = `${newContent}${HtmlEncode(oldContent[i])}`;
+                                }
+                                else
+                                {
+                                    if(oldContent[i] === '\n')
+                                    {
+                                        error = true;
+                                    }
+                                    newContent = `${newContent}${oldContent[i]}`;
+                                }
+                            }
+                            if(error)
+                            {
+                                result = `${result}<span class="error">${newContent.replaceAll(' ', '&nbsp;')}</span>`;
+                            }
+                            else
+                            {
+                                result = `${result}<span class="string">${newContent.replaceAll(' ', '&nbsp;')}</span>`;
+                            }
+                            break;
+                        default:
+                            result = `${result}${nodes[i].content.replaceAll(' ', '&nbsp;')}`;
+                            break;
+                    }
                 }
             }
             else
             {
-                toShow = `${toShow}{${highlight(node[1], depth + 1)}}`;
-            }
-        }
-        else // It's a string, ez pz let's write it with some spacing
-        {
-            switch(node[1])
-            {
-                case 'Hello':
-                    toShow = `${toShow}<span style="color: #a1a1a1;">${node[2]}</span>`;
-                    break;
-                case '\n':
-                    toShow = `${toShow}\n`;//‪
-                    break;
-                default:
-                    toShow = `${toShow}${node[2]}`;
-                    break;
+                switch(nodes[i].name)
+                {
+                    case 'Word':
+                        if(KEYWORDS.includes(nodes[i].content))
+                        {
+                            result = `${result}<span class="keyword">${HtmlEncode(nodes[i].content)}</span>`;
+                        }
+                        else if(LOGICS.includes(nodes[i].content))
+                        {
+                            result = `${result}<span class="logic">${HtmlEncode(nodes[i].content)}</span>`;
+                        }
+                        else if(LOGIC_CONTROLS.includes(nodes[i].content))
+                        {
+                            result = `${result}<span class="logcontrols">${HtmlEncode(nodes[i].content)}</span>`;
+                        }
+                        else
+                        {
+                            result = `${result}<span class="word">${HtmlEncode(nodes[i].content)}</span>`;
+                        }
+                        break;
+                    case 'Number':
+                        result = `${result}<span class="number">${HtmlEncode(nodes[i].content)}</span>`;
+                        break;
+                    default:
+                        result = `${result}${HtmlEncode(nodes[i].content)}`;
+                        break;
+                }
             }
         }
     }
-    let lastLineIndex = 0;
-    let remakeShow = '';
-    // Since we now have the content, let's make it HTML friendly
-    for(let i = 0; i < toShow.length; i++)
-    {
-        if(toShow[i] === '\n')
-        {
-            // SecondLine - FirstLine
-            let content = Txt.extract(toShow, lastLineIndex, i - lastLineIndex);
-            remakeShow = `${remakeShow}<p>${content}</p>`;
-            lastLineIndex = i + 1;
-        }
-    }
-    remakeShow = `${remakeShow}<p>${Txt.extract(toShow, lastLineIndex, toShow.length - lastLineIndex)}</p>`;
-    return remakeShow;
-}
-
+    return result;
+};
 function fastInput()
 {
     const countLines = (content) => {
@@ -461,68 +326,34 @@ function fastInput()
         }
         return result;
     }
-    let userInput = document.getElementById('userInput');
-    const rectifyLines = (content) =>  {
-        let rectifiedContent = '';
-        const maxWidth = 180;
-        let actualWidth = 0;
+    const formatText = (content) =>  {
+        let rectifiedContent = '<p>';
         for(let i = 0; i < content.length; i++)
         {
-            actualWidth++;
             if(content[i] === '\n')
             {
-                actualWidth = 1;
+                rectifiedContent = `${rectifiedContent}</p><p>`;
             }
-            if(actualWidth % maxWidth == 0)
+            else
             {
-                rectifiedContent = `${rectifiedContent}\n`;
+                rectifiedContent = `${rectifiedContent}${content[i]}`;
             }
-            rectifiedContent = `${rectifiedContent}${content[i]}`;
         }
-        return rectifiedContent;
+        return `${rectifiedContent}</p>`;
     };
-    //userInput.value = rectifyLines(userInput.value);
+    let uInput = document.getElementById('userInput');
     let editNLines = document.querySelector('.editor_linenumber');
-    editNLines.innerHTML = generateLines(Math.max(countLines(userInput.value), 35));
-    //let output = document.querySelector('.userOutput');
-    //let userLog = document.querySelector('.errorOutput');
-    let subdivided = LookForPattern(userInput.value, AllBasicPatterns);
-    let packLogs = '';
-    for(let log of logs)
-    {
-        packLogs = `${packLogs}${log}\n`;
-    }
-    for(let i = logs.length; i > 0; i--)
-    {
-        logs.pop();
-    }
-    //userLog.innerHTML = `<pre>${packLogs}</pre>`;
-    //output.innerHTML = `<pre>${separateNodes(subdivided.result)}</pre>`;
+    editNLines.innerHTML = generateLines(Math.max(countLines(uInput.value), 35));
     let clone = document.getElementById('cloneInput');
-    clone.innerHTML = highlight(subdivided.result);
+    clone.innerHTML = formatText(navigateNodes(LookForPattern(uInput.value, AllBasicPatterns).result));
 }
-
 fastInput();
-let userInput = document.getElementById('userInput');
+const userInput = document.getElementById('userInput');
 userInput.addEventListener('input', (e) => {
+    userInput.style.height = userInput.scrollHeight+'px';
     fastInput();
 });
 userInput.addEventListener('scroll', (e) => {
-    scrollThread();
-});
-
-function scrollThread()
-{
-    let userInput = document.getElementById('userInput');
     let backdrop = document.getElementById('cloneInput');
-    let editNLines = document.querySelector('.editor_linenumber');
-    backdrop.scroll(userInput.scrollLeft, userInput.scrollTop);
-    editNLines.scroll(userInput.scrollLeft, userInput.scrollTop);
-    userInput.scroll(userInput.scrollLeft, userInput.scrollTop);
-}
-
-function textAreaAdjust(element)
-{
-    element.style.height = "1px";
-    element.style.height = `${element.scrollHeight}px`;
-}
+    userInput.scroll(backdrop.scrollLeft, backdrop.scrollTop);
+});

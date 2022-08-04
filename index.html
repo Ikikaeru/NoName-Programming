@@ -5,7 +5,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>NoName-Programming</title>
-        <link rel="stylesheet" href="assets/style.css">
+        <link rel="stylesheet" href="assets/scss/style.css">
+        <script src="assets/js/txt.js"></script>
+        <script src="assets/js/basicPattern.js"></script>
         <script defer src="main.js"></script>
     </head>
     <body>
@@ -25,13 +27,20 @@
         <div class="errorOutput"></div>
         <h2>Output:</h2>
         <div class="userOutput"></div>-->
-        <div class="editor">
-            <div class="editor_linenumber"></div>
-            <div class="editor_container">
-                <textarea id="userInput" class="editor_container_inputarea"
-                    spellcheck="false" onkeyup="textAreaAdjust(this)">Hello World.</textarea>
-                <div id="cloneInput" class="editor_container_backdrop"></div>
-            </div>
-        </div>
+<div class="editor">
+    <div class="editor_linenumber"></div>
+    <div class="editor_container">
+        <textarea id="userInput" class="editor_container_inputarea"
+            spellcheck="false">class BasicPattern
+{
+    **
+        * Create a basic pattern object with a bunch of parameters for full customisation.
+        * @param {{name: string, defaultValue: any, isPattern: (i: number, c: char, t: string) => boolean, isPatternEnd: (i: number, c: char, t: string) => boolean, fetch: (i: number, c: char, t: string) => {lastIndex: number, content: any}} pattern 
+        *
+}</textarea>
+        <div id="cloneInput" class="editor_container_backdrop"></div>
+    </div>
+</div>
+<pre class="format_test"></pre>
     </body>
 </html>

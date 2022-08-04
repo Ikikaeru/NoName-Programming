@@ -1,72 +1,109 @@
 * {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
+
 body {
-    font-family: 'Courier New', Courier, monospace;
-    background-color: rgb(17, 17, 17);
-    color: rgb(236, 236, 236);
+  font-family: "Courier New", Courier, monospace;
+  background-color: rgb(17, 17, 17);
+  color: rgb(236, 236, 236);
 }
+
+.error {
+  background-color: red;
+}
+
+.comment {
+  color: green;
+}
+
+.string {
+  color: orange;
+}
+
+.word {
+  color: cyan;
+}
+
+.keyword {
+  color: rgb(218, 75, 142);
+}
+
+.number {
+  color: rgb(230, 207, 179);
+}
+
+.logic {
+  color: rgb(216, 12, 12);
+}
+
+.logcontrols {
+  color: rgb(248, 62, 140);
+}
+
 .editor > .editor_linenumber > p {
-    width: 60px;
+  width: 60px;
 }
+
 .editor {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow: scroll;
-    &_linenumber {
-        width: 60px;
-        max-height: 630px; // 35 * 18px
-        min-width: 60px;
-        max-width: 60px;
-        text-align: right;
-        p {
-            padding-right: 5px;
-            background-color: #272727;
-        }
-        p:nth-child(2n) {
-            background-color: #1b1b1b;
-        }
-    }
-    &_container {
-        position: relative;
-        height: 630px;
-        &_inputarea {
-            padding-left: 5px;
-            display: inline-block;
-            width: calc(100% - 5px);
-            height: 100%;
-            position: absolute;
-            z-index: 2;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: medium;
-            resize: none;
-            border: none;
-            white-space: nowrap;
-            //color: transparent;
-            color: rgba(236, 236, 236, 0.15);
-            background-color: transparent;
-            caret-color: rgb(236, 236, 236);
-            overflow: hidden;
-            &:focus {
-                outline: none;
-            }
-        }
-        &_backdrop {
-            padding-left: 5px;
-            width: calc(100% - 5px);
-            height: 100%;
-            z-index: 1;
-            white-space: nowrap;
-            font-size: medium;
-            overflow: visible;
-            p {
-                height: 18px;
-            }
-        }
-    }
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  min-height: 630px;
+  max-height: 630px;
+  overflow: scroll;
 }
+.editor_linenumber {
+  width: 60px;
+  min-height: 630px;
+  max-height: 630px;
+  min-width: 60px;
+  max-width: 60px;
+  text-align: right;
+}
+.editor_linenumber p {
+  padding-right: 5px;
+  background-color: #272727;
+}
+.editor_linenumber p:nth-child(2n) {
+  background-color: #1b1b1b;
+}
+.editor_container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.editor_container_inputarea {
+  padding-left: 5px;
+  min-width: calc(100% - 5px);
+  min-height: 630px;
+  position: absolute;
+  z-index: 2;
+  font-family: "Courier New", Courier, monospace;
+  font-size: medium;
+  resize: vertical;
+  border: none;
+  white-space: nowrap;
+  color: rgba(236, 236, 236, 0.15);
+  background-color: transparent;
+  caret-color: rgb(236, 236, 236);
+  overflow: hidden;
+}
+.editor_container_inputarea:focus {
+  outline: none;
+}
+.editor_container_backdrop {
+  position: absolute;
+  padding-left: 5px;
+  font-family: "Courier New", Courier, monospace;
+  white-space: nowrap;
+  font-size: medium;
+  overflow: hidden;
+}
+.editor_container_backdrop p {
+  height: 18px;
+}
+
 /*
 #userInput {
     font-size: medium;
@@ -89,8 +126,6 @@ body {
     //border-color: transparent;
 }
 */
-
-
 /*
 h1, h2 {
     margin-left: 20px;
