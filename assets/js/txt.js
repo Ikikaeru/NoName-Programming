@@ -51,4 +51,35 @@ class Txt
             lastIndex: lastIndex
         };
     }
+    /**
+     * Return the number of lines contained inside a string.
+     * @param {number} content The string content from which we want to count the lines.
+     * @returns {number} The number of lines contained in the string.
+     */
+    static countLines(content)
+    {
+        let line = 1;
+        for(let i = 0; i < content.length; i++)
+        {
+            if(content[i] === '\n')
+            {
+                line++;
+            }
+        }
+        return line;
+    }
+    static _internalDivAssign(div)
+    {
+        this._internalDiv = div;
+    }
+    static HTMLEncode(content)
+    {
+        if(this._internalDiv === undefined)
+        {
+            this._internalDivAssign(document.createElement("div"));
+        }
+        this._internalDiv.innerText = this._internalDiv.textContent = content;
+        content = this._internalDiv.innerHTML;
+        return content;
+    }
 }

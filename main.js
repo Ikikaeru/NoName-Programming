@@ -2,24 +2,18 @@ const controls = [ '\n' ];
 const whitespaces = [ ' ', '\t' ];
 const symbols = [ '§', '@', '¥', '€', '¬', '&', '|', '#', '^', '*', '$', '%', '±', '=', '+', '-', '*', '/', '\\', '<', '>', '~', '°', '_', '`', '´', '¨', '(', ')', '[', ']', '{', '}' ];
 const punctuations = [ '.', ',', ';', ':', '?', '!', '"', '\'', '«', '»' ];
-const letters = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                    'á', 'à', 'ä', 'â',
-                    'é', 'è', 'ë', 'ê',
-                    'í', 'ì', 'ï', 'î',
-                    'ó', 'ò', 'ö', 'ô',
-                    'ú', 'ù', 'ü', 'û',
-                    'Ç', 'ç'
+const KEYWORDS = [
+    'let', 'new', 'from', 'to', 'static', 'in', 'as', 'do',
+    'inside', 'select', 'set', 'get', 'insert', 'delete',
+    'define', 'function', 'value', 'use', 'public', 'private',
+    'protected', 'readonly', 'import', 'export', 'namespace',
+    'const', 'this'
 ];
-const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const KEYWORDS = [  'let', 'new', 'from', 'to', 'static', 'in', 'as', 'do',
-                    'inside', 'select', 'set', 'get', 'insert', 'delete',
-                    'define', 'function', 'value', 'use', 'public', 'private',
-                    'protected', 'readonly', 'import', 'export', 'namespace'
+const LOGICS = [
+    'for', 'foreach', 'while', 'if', 'switch', 'try', 'catch', 'finaly'
 ];
-const LOGICS = [    'for', 'foreach', 'while', 'if', 'switch', 'try', 'catch', 'finaly'
-];
-const LOGIC_CONTROLS = [    'return', 'break', 'continue'
+const LOGIC_CONTROLS = [
+    'return', 'break', 'continue'
 ];
 const logs = [];
 
@@ -52,11 +46,12 @@ function LookForPattern(txtContent, patternSet, i = 0, endPattern = (i, c, t) =>
                 let fetchResult = patternSet[j].fetchContent(i, txtContent[i], txtContent, patternSet, patternSet[j]); // Execute something then return the fetched result
                 i = fetchResult.lastIndex; // Assign the new index
                 subdivided.push({
+                    name: patternSet[j].name,
+                    currentName: fetchResult.name,
                     begin: fetchResult.begin,
                     end: fetchResult.end,
                     nested: fetchResult.nested,
                     error: fetchResult.error,
-                    name: patternSet[j].name,
                     content: fetchResult.content
                 }); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
                 break; // No need to check more pattern, we've got one already
@@ -89,69 +84,75 @@ const AllBasicPatterns = [
                 }
             }
             return {
+                name: 'Comment Line',
                 content: result,
                 lastIndex: lastIndex
             };
         }
     }),
     new BasicPattern({ name: 'Comment Multiline', defaultValue: '/*',
-    isPattern: (i, c, txt) => { return txt[i] === '/' && i + 1 < txt.length && txt[i + 1] === '*'; },
-    fetch: (index, c, txt) => {
-        let result = '/*';
-        let lastIndex = index + 1;
-        for(let i = index + 2; i < txt.length; i++)
-        {
-            result = `${result}${txt[i]}`;
-            lastIndex = i;
-            if(txt[i] === '/' && i - 1 >= 0 && txt[i - 1] === '*')
+        isPattern: (i, c, txt) => { return txt[i] === '/' && i + 1 < txt.length && txt[i + 1] === '*'; },
+        fetch: (index, c, txt) => {
+            let result = '/*';
+            let lastIndex = index + 1;
+            for(let i = index + 2; i < txt.length; i++)
             {
-                break;
+                result = `${result}${txt[i]}`;
+                lastIndex = i;
+                if(txt[i] === '/' && i - 1 >= 0 && txt[i - 1] === '*')
+                {
+                    break;
+                }
             }
-        }
-        // If we're out of bounds but found no closing 
-        if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '/' && txt[txt.length - 2] !== '*')
-        {
+            // If we're out of bounds but found no closing 
+            if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '/' && txt[txt.length - 2] !== '*')
+            {
+                return {
+                    name: 'Comment Multiline',
+                    error: true,
+                    content: '/*',
+                    lastIndex: index + 1
+                };
+            }
             return {
-                error: true,
-                content: '/*',
-                lastIndex: index + 1
+                name: 'Comment Multiline',
+                content: result,
+                lastIndex: lastIndex
             };
         }
-        return {
-            content: result,
-            lastIndex: lastIndex
-        };
-    }
-}),
-new BasicPattern({ name: 'String Classic', defaultValue: '\'',
-    isPattern: (i, c, txt) => { return c === '\''; },
-    fetch: (index, c, txt) => {
-        let result = '\'';
-        let lastIndex = index;
-        for(let i = index + 1; i < txt.length; i++)
-        {
-            result = `${result}${txt[i]}`;
-            lastIndex = i;
-            if(txt[i] === '\'' && txt[i - 1] !== '\\')
+    }),
+    new BasicPattern({ name: 'String Classic', defaultValue: '\'',
+        isPattern: (i, c, txt) => { return c === '\''; },
+        fetch: (index, c, txt) => {
+            let result = '\'';
+            let lastIndex = index;
+            for(let i = index + 1; i < txt.length; i++)
             {
-                break;
+                result = `${result}${txt[i]}`;
+                lastIndex = i;
+                if(txt[i] === '\'' && txt[i - 1] !== '\\')
+                {
+                    break;
+                }
             }
-        }
-        // If we're out of bounds but found no closing '
-        if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '\'')
-        {
+            // If we're out of bounds but found no closing '
+            if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '\'')
+            {
+                return {
+                    name: 'String Classic',
+                    error: true,
+                    content: '\'',
+                    lastIndex: index
+                };
+            }
             return {
-                error: true,
-                content: '\'',
-                lastIndex: index
+                name: 'String Classic',
+                content: result,
+                lastIndex: lastIndex
             };
         }
-        return {
-            content: result,
-            lastIndex: lastIndex
-        };
-    }
-}),
+    }),
+    BasicPattern.simpleCharbox('DoubleParenthesis', '((', '))'),
     BasicPattern.simpleCharbox('Parenthesis', '(', ')'),
     BasicPattern.simpleCharbox('Bracket', '[', ']'),
     BasicPattern.simpleCharbox('Curly Bracket', '{', '}'),
@@ -167,6 +168,7 @@ new BasicPattern({ name: 'String Classic', defaultValue: '\'',
             });
             let spaceResult = result.value;
             return {
+                name: 'Whitespaces',
                 content: spaceResult,
                 lastIndex: result.lastIndex
             };
@@ -177,24 +179,18 @@ new BasicPattern({ name: 'String Classic', defaultValue: '\'',
  
 const navigateNodes = (nodes) => {
     let result = '';
-    const HtmlEncode = (s) => {
-        let el = document.createElement("div");
-        el.innerText = el.textContent = s;
-        s = el.innerHTML;
-        return s;
-    }
     for(let i = 0; i < nodes.length; i++)
     {
         if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
         {
-            let encodeBegin = HtmlEncode(nodes[i].begin);
+            let encodeBegin = Txt.HTMLEncode(nodes[i].begin);
             if(nodes[i].error) // An error occured, most likely a not closed block
             {
                 result = `${result}<span class="error">${encodeBegin}</span>`;
             }
             else // No error occured
             {
-                result = `${result}${encodeBegin}${navigateNodes(nodes[i].content)}${HtmlEncode(nodes[i].end)}`;
+                result = `${result}${encodeBegin}${navigateNodes(nodes[i].content)}${Txt.HTMLEncode(nodes[i].end)}`;
             }
         }
         else // It's a string, ez pz let's write it with some spacing
@@ -245,24 +241,30 @@ const navigateNodes = (nodes) => {
                             {
                                 if(oldContent[i] !== ' ' && oldContent[i] !== '\n')
                                 {
-                                    newContent = `${newContent}${HtmlEncode(oldContent[i])}`;
+                                    newContent = `${newContent}${Txt.HTMLEncode(oldContent[i])}`;
                                 }
                                 else
                                 {
+                                    let toWrite = oldContent[i];
                                     if(oldContent[i] === '\n')
                                     {
                                         error = true;
+                                        toWrite = `</span>${oldContent[i]}<span class="error">`;
                                     }
-                                    newContent = `${newContent}${oldContent[i]}`;
+                                    else if(oldContent[i] === ' ')
+                                    {
+                                        toWrite = '&nbsp;';
+                                    }
+                                    newContent = `${newContent}${toWrite}`;
                                 }
                             }
                             if(error)
                             {
-                                result = `${result}<span class="error">${newContent.replaceAll(' ', '&nbsp;')}</span>`;
+                                result = `${result}<span class="error">${newContent}</span>`;
                             }
                             else
                             {
-                                result = `${result}<span class="string">${newContent.replaceAll(' ', '&nbsp;')}</span>`;
+                                result = `${result}<span class="string">${newContent}</span>`;
                             }
                             break;
                         default:
@@ -273,31 +275,32 @@ const navigateNodes = (nodes) => {
             }
             else
             {
+                let encoded = Txt.HTMLEncode(nodes[i].content);
                 switch(nodes[i].name)
                 {
                     case 'Word':
                         if(KEYWORDS.includes(nodes[i].content))
                         {
-                            result = `${result}<span class="keyword">${HtmlEncode(nodes[i].content)}</span>`;
+                            result = `${result}<span class="keyword">${encoded}</span>`;
                         }
                         else if(LOGICS.includes(nodes[i].content))
                         {
-                            result = `${result}<span class="logic">${HtmlEncode(nodes[i].content)}</span>`;
+                            result = `${result}<span class="logic">${encoded}</span>`;
                         }
                         else if(LOGIC_CONTROLS.includes(nodes[i].content))
                         {
-                            result = `${result}<span class="logcontrols">${HtmlEncode(nodes[i].content)}</span>`;
+                            result = `${result}<span class="logcontrols">${encoded}</span>`;
                         }
                         else
                         {
-                            result = `${result}<span class="word">${HtmlEncode(nodes[i].content)}</span>`;
+                            result = `${result}<span class="word">${encoded}</span>`;
                         }
                         break;
                     case 'Number':
-                        result = `${result}<span class="number">${HtmlEncode(nodes[i].content)}</span>`;
+                        result = `${result}<span class="number">${encoded}</span>`;
                         break;
                     default:
-                        result = `${result}${HtmlEncode(nodes[i].content)}`;
+                        result = `${result}${encoded}`;
                         break;
                 }
             }
@@ -307,17 +310,6 @@ const navigateNodes = (nodes) => {
 };
 function fastInput()
 {
-    const countLines = (content) => {
-        let line = 1;
-        for(let i = 0; i < content.length; i++)
-        {
-            if(content[i] === '\n')
-            {
-                line++;
-            }
-        }
-        return line;
-    }
     const generateLines = (n) => {
         let result = '';
         for(let i = 1; i <= n; i++)
@@ -343,7 +335,7 @@ function fastInput()
     };
     let uInput = document.getElementById('userInput');
     let editNLines = document.querySelector('.editor_linenumber');
-    editNLines.innerHTML = generateLines(Math.max(countLines(uInput.value), 35));
+    editNLines.innerHTML = generateLines(Math.max(Txt.countLines(uInput.value), 35));
     let clone = document.getElementById('cloneInput');
     clone.innerHTML = formatText(navigateNodes(LookForPattern(uInput.value, AllBasicPatterns).result));
 }

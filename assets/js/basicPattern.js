@@ -1,3 +1,13 @@
+const letters = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                    'á', 'à', 'ä', 'â',
+                    'é', 'è', 'ë', 'ê',
+                    'í', 'ì', 'ï', 'î',
+                    'ó', 'ò', 'ö', 'ô',
+                    'ú', 'ù', 'ü', 'û',
+                    'Ç', 'ç'
+];
+const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 /**
  * BasicPattern is a generic class made to check for pattern while looking inside a string.
  * It fetch it's inner value with the pattern founded and then return it's last index.
