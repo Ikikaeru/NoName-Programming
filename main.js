@@ -352,12 +352,6 @@ function fastInput()
 }
 fastInput();
 
-
-
-
-
-
-
 HTMLTextAreaElement.prototype.getCaretPosition = function () { //return the caret position of the textarea
     return this.selectionStart;
 };
@@ -382,8 +376,6 @@ HTMLTextAreaElement.prototype.setSelection = function (start, end) { //change th
     this.focus();
 };
 
-
-
 const userInput = document.getElementById('userInput');
 userInput.addEventListener('input', (e) => {
     userInput.style.height = userInput.scrollHeight+'px';
@@ -392,14 +384,16 @@ userInput.addEventListener('input', (e) => {
 userInput.addEventListener('keydown', event => {
     if (event.key === 'Tab') {
         let newCaretPosition;
-        newCaretPosition = userInput.getCaretPosition() + "    ".length;
+        newCaretPosition = userInput.getCaretPosition() + 4;
         userInput.value = userInput.value.substring(0, userInput.getCaretPosition()) + "    " + userInput.value.substring(userInput.getCaretPosition(), userInput.value.length);
         userInput.setCaretPosition(newCaretPosition);
+        userInput.style.height = userInput.scrollHeight+'px';
         event.preventDefault();
         fastInput();
     }
 });
 userInput.addEventListener('scroll', (e) => {
     let backdrop = document.getElementById('cloneInput');
+    userInput.style.height = userInput.scrollHeight+'px';
     userInput.scroll(backdrop.scrollLeft, backdrop.scrollTop);
 });
