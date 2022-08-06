@@ -81,7 +81,7 @@ body {
   z-index: 2;
   font-family: "Courier New", Courier, monospace;
   font-size: medium;
-  resize: vertical;
+  resize: none;
   border: none;
   white-space: pre;
   color: rgba(236, 236, 236, 0.15);

@@ -193,7 +193,94 @@ const AllBasicPatterns = [
     }),
     BasicPattern.simpleChar('Controls', (c) => { return controls.includes(c); })
 ];
- 
+
+const HighlightPattern = {
+    'Controls': (content, toAdd) => `${content}${toAdd}`,
+    'Whitespaces': (content, toAdd) => `${content}${toAdd.replaceAll(' ', '&nbsp;')}`,
+    'Comment Line': (content, toAdd) => `${content}<span class="comment">${toAdd.replaceAll(' ', '&nbsp;')}</span>`,
+    'String Classic': (content, toAdd) => {
+        let newContent = '';
+        let error = false;
+        for(let i = 0; i < toAdd.length; i++)
+        {
+            if(toAdd[i] !== ' ' && toAdd[i] !== '\n')
+            {
+                newContent = `${newContent}${Txt.HTMLEncode(toAdd[i])}`;
+            }
+            else
+            {
+                let toWrite = toAdd[i];
+                if(toAdd[i] === '\n')
+                {
+                    error = true;
+                    toWrite = `</span>\r${toAdd[i]}<span class="error">`;
+                }
+                else if(toAdd[i] === ' ')
+                {
+                    toWrite = '&nbsp;';
+                }
+                newContent = `${newContent}${toWrite}`;
+            }
+        }
+        if(error)
+        {
+            return `${content}<span class="error">${newContent}</span>`;
+        }
+        else
+        {
+            return `${content}<span class="string">${newContent}</span>`;
+        }
+    },
+    'Comment Multiline': (content, toAdd, error) => {
+        if(error)
+        {
+            return `${content}<span class="error">${toAdd.replaceAll(' ', '&nbsp;')}</span>`;
+        }
+        else
+        {
+            const formatText = (txt) =>  {
+                let rectifiedContent = '';
+                for(let i = 0; i < txt.length; i++)
+                {
+                    if(txt[i] === '\n')
+                    {
+                        rectifiedContent = `${rectifiedContent}</span></p><p><span class="comment">`;
+                    }
+                    else
+                    {
+                        rectifiedContent = `${rectifiedContent}${txt[i]}`;
+                    }
+                }
+                return `${rectifiedContent}</span>`;
+            };
+            return `${content}<span class="comment">${formatText(toAdd.replaceAll(' ', '&nbsp;'))}</span>`;
+        }
+    },
+    'Word': (content, toAdd) => {
+        let encoded = Txt.HTMLEncode(toAdd);
+        if(KEYWORDS.includes(toAdd))
+        {
+            return `${content}<span class="keyword">${encoded}</span>`;
+        }
+        else if(LOGICS.includes(toAdd))
+        {
+            return `${content}<span class="logic">${encoded}</span>`;
+        }
+        else if(LOGIC_CONTROLS.includes(toAdd))
+        {
+            return `${content}<span class="logcontrols">${encoded}</span>`;
+        }
+        else
+        {
+            return `${content}<span class="word">${encoded}</span>`;
+        }
+    },
+    'Number': (content, toAdd) => {
+        let encoded = Txt.HTMLEncode(toAdd);
+        return `${content}<span class="number">${encoded}</span>`;
+    }
+};
+
 const navigateNodesHighlight = (nodes) => {
     let result = '';
     for(let i = 0; i < nodes.length; i++)
@@ -212,114 +299,14 @@ const navigateNodesHighlight = (nodes) => {
         }
         else // It's a string, ez pz let's write it with some spacing
         {
-            if(nodes[i].name === 'Control' || nodes[i].content === '\n')
+            let highlight = HighlightPattern[nodes[i].name];
+            if(highlight)
             {
-                result = `${result}${nodes[i].content}`;
-            }
-            else if(nodes[i].name === 'Whitespaces'
-            || nodes[i].name === 'String Classic'
-            || nodes[i].name === 'Comment Line'
-            || nodes[i].name === 'Comment Multiline')
-            {
-                if(nodes[i].error)
-                {
-                    result = `${result}<span class="error">${nodes[i].content.replaceAll(' ', '&nbsp;')}</span>`;
-                }
-                else
-                {
-                    switch(nodes[i].name)
-                    {
-                        case 'Comment Multiline':
-                            const formatText = (content) =>  {
-                                let rectifiedContent = '';
-                                for(let i = 0; i < content.length; i++)
-                                {
-                                    if(content[i] === '\n')
-                                    {
-                                        rectifiedContent = `${rectifiedContent}</span></p><p><span class="comment">`;
-                                    }
-                                    else
-                                    {
-                                        rectifiedContent = `${rectifiedContent}${content[i]}`;
-                                    }
-                                }
-                                return `${rectifiedContent}</span>`;
-                            };
-                            result = `${result}<span class="comment">${formatText(nodes[i].content.replaceAll(' ', '&nbsp;'))}</span>`;
-                            break;
-                        case 'Comment Line':
-                            result = `${result}<span class="comment">${nodes[i].content.replaceAll(' ', '&nbsp;')}</span>`;
-                            break;
-                        case 'String Classic':
-                            let oldContent = nodes[i].content;
-                            let newContent = '';
-                            let error = false;
-                            for(let i = 0; i < oldContent.length; i++)
-                            {
-                                if(oldContent[i] !== ' ' && oldContent[i] !== '\n')
-                                {
-                                    newContent = `${newContent}${Txt.HTMLEncode(oldContent[i])}`;
-                                }
-                                else
-                                {
-                                    let toWrite = oldContent[i];
-                                    if(oldContent[i] === '\n')
-                                    {
-                                        error = true;
-                                        toWrite = `</span>\r${oldContent[i]}<span class="error">`;
-                                    }
-                                    else if(oldContent[i] === ' ')
-                                    {
-                                        toWrite = '&nbsp;';
-                                    }
-                                    newContent = `${newContent}${toWrite}`;
-                                }
-                            }
-                            if(error)
-                            {
-                                result = `${result}<span class="error">${newContent}</span>`;
-                            }
-                            else
-                            {
-                                result = `${result}<span class="string">${newContent}</span>`;
-                            }
-                            break;
-                        default:
-                            result = `${result}${nodes[i].content.replaceAll(' ', '&nbsp;')}`;
-                            break;
-                    }
-                }
+                result = highlight(result, nodes[i].content, nodes[i].error);
             }
             else
             {
-                let encoded = Txt.HTMLEncode(nodes[i].content);
-                switch(nodes[i].name)
-                {
-                    case 'Word':
-                        if(KEYWORDS.includes(nodes[i].content))
-                        {
-                            result = `${result}<span class="keyword">${encoded}</span>`;
-                        }
-                        else if(LOGICS.includes(nodes[i].content))
-                        {
-                            result = `${result}<span class="logic">${encoded}</span>`;
-                        }
-                        else if(LOGIC_CONTROLS.includes(nodes[i].content))
-                        {
-                            result = `${result}<span class="logcontrols">${encoded}</span>`;
-                        }
-                        else
-                        {
-                            result = `${result}<span class="word">${encoded}</span>`;
-                        }
-                        break;
-                    case 'Number':
-                        result = `${result}<span class="number">${encoded}</span>`;
-                        break;
-                    default:
-                        result = `${result}${encoded}`;
-                        break;
-                }
+                result = `${result}${Txt.HTMLEncode(nodes[i].content)}`;
             }
         }
     }
