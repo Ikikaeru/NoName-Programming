@@ -351,10 +351,53 @@ function fastInput()
     clone.innerHTML = formatText(navigateNodes(LookForPattern(uInput.value, AllBasicPatterns).result));
 }
 fastInput();
+
+
+
+
+
+
+
+HTMLTextAreaElement.prototype.getCaretPosition = function () { //return the caret position of the textarea
+    return this.selectionStart;
+};
+HTMLTextAreaElement.prototype.setCaretPosition = function (position) { //change the caret position of the textarea
+    this.selectionStart = position;
+    this.selectionEnd = position;
+    this.focus();
+};
+HTMLTextAreaElement.prototype.hasSelection = function () { //if the textarea has selection then return true
+    if (this.selectionStart == this.selectionEnd) {
+        return false;
+    } else {
+        return true;
+    }
+};
+HTMLTextAreaElement.prototype.getSelectedText = function () { //return the selection text
+    return this.value.substring(this.selectionStart, this.selectionEnd);
+};
+HTMLTextAreaElement.prototype.setSelection = function (start, end) { //change the selection area of the textarea
+    this.selectionStart = start;
+    this.selectionEnd = end;
+    this.focus();
+};
+
+
+
 const userInput = document.getElementById('userInput');
 userInput.addEventListener('input', (e) => {
     userInput.style.height = userInput.scrollHeight+'px';
     fastInput();
+});
+userInput.addEventListener('keydown', event => {
+    if (event.key === 'Tab') {
+        let newCaretPosition;
+        newCaretPosition = userInput.getCaretPosition() + "    ".length;
+        userInput.value = userInput.value.substring(0, userInput.getCaretPosition()) + "    " + userInput.value.substring(userInput.getCaretPosition(), userInput.value.length);
+        userInput.setCaretPosition(newCaretPosition);
+        event.preventDefault();
+        fastInput();
+    }
 });
 userInput.addEventListener('scroll', (e) => {
     let backdrop = document.getElementById('cloneInput');
