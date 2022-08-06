@@ -83,6 +83,7 @@ body {
   font-size: medium;
   resize: vertical;
   border: none;
+  white-space: pre;
   color: rgba(236, 236, 236, 0.15);
   background-color: transparent;
   caret-color: rgb(236, 236, 236);

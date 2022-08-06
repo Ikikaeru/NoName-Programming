@@ -126,13 +126,24 @@ const AllBasicPatterns = [
         fetch: (index, c, txt) => {
             let result = '\'';
             let lastIndex = index;
+            let dualSlashIndex = -2; // Should just be negative, the value doesn't matter
             for(let i = index + 1; i < txt.length; i++)
             {
                 result = `${result}${txt[i]}`;
                 lastIndex = i;
-                if(txt[i] === '\'' && txt[i - 1] !== '\\')
+                if(txt[i] === '\'')
                 {
-                    break;
+                     // If either the previous is not \ or the previous is \ and is in reality \\
+                    if((txt[i - 1] === '\\' && dualSlashIndex != i - 1) || txt[i - 1] !== '\\')
+                    {
+                        break;
+                    }
+                }
+                // \ founded and the next is also \
+                if(txt[i] === '\\' && i + 1 < txt.length && txt[i + 1] === '\\')
+                {
+                    result = `${result}${txt[i]}`;
+                    dualSlashIndex = ++i;
                 }
             }
             // If we're out of bounds but found no closing '
