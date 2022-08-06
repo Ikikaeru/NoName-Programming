@@ -249,7 +249,7 @@ const navigateNodes = (nodes) => {
                                     if(oldContent[i] === '\n')
                                     {
                                         error = true;
-                                        toWrite = `</span>${oldContent[i]}<span class="error">`;
+                                        toWrite = `</span>\r${oldContent[i]}<span class="error">`;
                                     }
                                     else if(oldContent[i] === ' ')
                                     {
