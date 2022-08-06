@@ -110,7 +110,7 @@ const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             isPattern: (i, c, txt) => { return c === begin; },
             isPatternEnd: (i, c, txt) => { return c === end; },
             fetch: (index, c, txt, endPattern, patternSet) => {
-                let p = PatternFinder.search(txt, patternSet, index + 1, endPattern); // Let's look for nested pattern over here..
+                let p = SyntaxMaker.search(txt, patternSet, index + 1, endPattern); // Let's look for nested pattern over here..
                 // We could filter patternSet if we wanted to get rid of some functions for this case or use whatever we want anyway.
                 if(p.isPatternEnd) // It's the end of our pattern
                 {

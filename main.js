@@ -17,279 +17,225 @@ const LOGIC_CONTROLS = [
 ];
 const logs = [];
 
-/*
-    PATTERNS
-*/
-const AllBasicPatterns = [
-    new Pattern({ name: 'Comment Line', defaultValue: '//',
-        isPattern: (i, c, txt) => { return c === '/' && i + 1 < txt.length && txt[i + 1] === '/'; },
-        fetch: (index, c, txt) => {
-            let result = '//';
-            let lastIndex = index;
-            for(let i = index + 2; i < txt.length; i++)
-            {
-                if(txt[i] === '\n')
+const syntax = new SyntaxMaker(
+    new SyntaxElement('Comment Line',
+        new Pattern({ defaultValue: '//',
+            isPattern: (i, c, txt) => { return c === '/' && i + 1 < txt.length && txt[i + 1] === '/'; },
+            fetch: (index, c, txt) => {
+                let result = '//';
+                let lastIndex = index;
+                for(let i = index + 2; i < txt.length; i++)
                 {
-                    break;
+                    if(txt[i] === '\n')
+                    {
+                        break;
+                    }
+                    result = `${result}${txt[i]}`;
+                    lastIndex = i;
                 }
-                result = `${result}${txt[i]}`;
-                lastIndex = i;
-            }
-            return {
-                name: 'Comment Line',
-                content: result,
-                lastIndex: lastIndex
-            };
-        }
-    }),
-    new Pattern({ name: 'Comment Multiline', defaultValue: '/*',
-        isPattern: (i, c, txt) => { return txt[i] === '/' && i + 1 < txt.length && txt[i + 1] === '*'; },
-        fetch: (index, c, txt) => {
-            let result = '/*';
-            let lastIndex = index + 1;
-            for(let i = index + 2; i < txt.length; i++)
-            {
-                result = `${result}${txt[i]}`;
-                lastIndex = i;
-                if(txt[i] === '/' && i - 1 >= 0 && txt[i - 1] === '*')
-                {
-                    break;
-                }
-            }
-            // If we're out of bounds but found no closing 
-            if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '/' && txt[txt.length - 2] !== '*')
-            {
                 return {
-                    name: 'Comment Multiline',
-                    error: true,
-                    content: '/*',
-                    lastIndex: index + 1
+                    content: result,
+                    lastIndex: lastIndex
                 };
             }
-            return {
-                name: 'Comment Multiline',
-                content: result,
-                lastIndex: lastIndex
-            };
-        }
-    }),
-    new Pattern({ name: 'String Classic', defaultValue: '\'',
-        isPattern: (i, c, txt) => { return c === '\''; },
-        fetch: (index, c, txt) => {
-            let result = '\'';
-            let lastIndex = index;
-            let dualSlashIndex = -2; // Should just be negative, the value doesn't matter
-            for(let i = index + 1; i < txt.length; i++)
-            {
-                result = `${result}${txt[i]}`;
-                lastIndex = i;
-                if(txt[i] === '\'')
+        }),
+        (content, toAdd) => `${content}<span class="comment">${toAdd.replaceAll(' ', '&nbsp;')}</span>`
+    ),
+    new SyntaxElement('Comment Multiline',
+        new Pattern({ defaultValue: '/*',
+            isPattern: (i, c, txt) => { return txt[i] === '/' && i + 1 < txt.length && txt[i + 1] === '*'; },
+            fetch: (index, c, txt) => {
+                let result = '/*';
+                let lastIndex = index + 1;
+                for(let i = index + 2; i < txt.length; i++)
                 {
-                    if(txt[i - 1] === '\\')
-                    {
-                        if(dualSlashIndex == i - 1)
-                        {
-                            break;
-                        }
-                    }
-                    else
+                    result = `${result}${txt[i]}`;
+                    lastIndex = i;
+                    if(txt[i] === '/' && i - 1 >= 0 && txt[i - 1] === '*')
                     {
                         break;
                     }
                 }
-                // \ founded and the next is also \
-                if(txt[i] === '\\' && i + 1 < txt.length && txt[i + 1] === '\\')
+                // If we're out of bounds but found no closing 
+                if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '/' && txt[txt.length - 2] !== '*')
                 {
-                    result = `${result}${txt[i]}`;
-                    dualSlashIndex = ++i;
+                    return {
+                        name: 'Comment Multiline',
+                        error: true,
+                        content: '/*',
+                        lastIndex: index + 1
+                    };
                 }
-            }
-            // If we're out of bounds but found no closing '
-            if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '\'')
-            {
                 return {
-                    name: 'String Classic',
-                    error: true,
-                    content: '\'',
-                    lastIndex: index
+                    name: 'Comment Multiline',
+                    content: result,
+                    lastIndex: lastIndex
                 };
             }
-            return {
-                name: 'String Classic',
-                content: result,
-                lastIndex: lastIndex
-            };
-        }
-    }),
-    Pattern.simpleCharbox('Parenthesis', '(', ')'),
-    Pattern.simpleCharbox('Bracket', '[', ']'),
-    Pattern.simpleCharbox('Curly Bracket', '{', '}'),
-    Pattern.number(),
-    Pattern.word(),
-    Pattern.simpleChar('Punctuation', (c) => { return punctuations.includes(c); }),
-    Pattern.simpleChar('Symbol', (c) => { return symbols.includes(c); }),
-    new Pattern({ name: 'Whitespaces', defaultValue: ' ',
-        isPattern: (i, c, txt) => { return whitespaces.includes(c); },
-        fetch: (index, c, txt) => {
-            let result = Txt.extractFromUntil(txt, index, (c) => {
-                return whitespaces.includes(c);
-            });
-            let spaceResult = result.value;
-            return {
-                name: 'Whitespaces',
-                content: spaceResult,
-                lastIndex: result.lastIndex
-            };
-        }
-    }),
-    Pattern.simpleChar('Controls', (c) => { return controls.includes(c); })
-];
-
-const HighlightPattern = {
-    'Controls': (content, toAdd) => `${content}${toAdd}`,
-    'Whitespaces': (content, toAdd) => `${content}${toAdd.replaceAll(' ', '&nbsp;')}`,
-    'Comment Line': (content, toAdd) => `${content}<span class="comment">${toAdd.replaceAll(' ', '&nbsp;')}</span>`,
-    'Number': (content, toAdd) => {
-        let encoded = Txt.HTMLEncode(toAdd);
-        return `${content}<span class="number">${encoded}</span>`;
-    },
-    'Word': (content, toAdd) => {
-        let encoded = Txt.HTMLEncode(toAdd);
-        if(KEYWORDS.includes(toAdd))
-        {
-            return `${content}<span class="keyword">${encoded}</span>`;
-        }
-        else if(LOGICS.includes(toAdd))
-        {
-            return `${content}<span class="logic">${encoded}</span>`;
-        }
-        else if(LOGIC_CONTROLS.includes(toAdd))
-        {
-            return `${content}<span class="logcontrols">${encoded}</span>`;
-        }
-        else
-        {
-            return `${content}<span class="word">${encoded}</span>`;
-        }
-    },
-    'String Classic': (content, toAdd) => {
-        let newContent = '';
-        let error = false;
-        for(let i = 0; i < toAdd.length; i++)
-        {
-            if(toAdd[i] !== ' ' && toAdd[i] !== '\n')
+        }),
+        (content, toAdd, error) => {
+            if(error)
             {
-                newContent = `${newContent}${Txt.HTMLEncode(toAdd[i])}`;
+                return `${content}<span class="error">${toAdd.replaceAll(' ', '&nbsp;')}</span>`;
             }
             else
             {
-                let toWrite = toAdd[i];
-                if(toAdd[i] === '\n')
-                {
-                    error = true;
-                    toWrite = `</span>\r${toAdd[i]}<span class="error">`;
-                }
-                else if(toAdd[i] === ' ')
-                {
-                    toWrite = '&nbsp;';
-                }
-                newContent = `${newContent}${toWrite}`;
-            }
-        }
-        if(error)
-        {
-            return `${content}<span class="error">${newContent}</span>`;
-        }
-        else
-        {
-            return `${content}<span class="string">${newContent}</span>`;
-        }
-    },
-    'Comment Multiline': (content, toAdd, error) => {
-        if(error)
-        {
-            return `${content}<span class="error">${toAdd.replaceAll(' ', '&nbsp;')}</span>`;
-        }
-        else
-        {
-            const formatText = (txt) =>  {
-                let rectifiedContent = '';
-                for(let i = 0; i < txt.length; i++)
-                {
-                    if(txt[i] === '\n')
+                const formatText = (txt) =>  {
+                    let rectifiedContent = '';
+                    for(let i = 0; i < txt.length; i++)
                     {
-                        rectifiedContent = `${rectifiedContent}</span></p><p><span class="comment">`;
+                        if(txt[i] === '\n')
+                        {
+                            rectifiedContent = `${rectifiedContent}</span></p><p><span class="comment">`;
+                        }
+                        else
+                        {
+                            rectifiedContent = `${rectifiedContent}${txt[i]}`;
+                        }
                     }
-                    else
+                    return `${rectifiedContent}</span>`;
+                };
+                return `${content}<span class="comment">${formatText(toAdd.replaceAll(' ', '&nbsp;'))}</span>`;
+            }
+        }
+    ),
+    new SyntaxElement('String Classic',
+        new Pattern({ defaultValue: '\'',
+            isPattern: (i, c, txt) => { return c === '\''; },
+            fetch: (index, c, txt) => {
+                let result = '\'';
+                let lastIndex = index;
+                let dualSlashIndex = -2; // Should just be negative, the value doesn't matter
+                for(let i = index + 1; i < txt.length; i++)
+                {
+                    result = `${result}${txt[i]}`;
+                    lastIndex = i;
+                    if(txt[i] === '\'')
                     {
-                        rectifiedContent = `${rectifiedContent}${txt[i]}`;
+                        if(txt[i - 1] === '\\')
+                        {
+                            if(dualSlashIndex == i - 1)
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    // \ founded and the next is also \
+                    if(txt[i] === '\\' && i + 1 < txt.length && txt[i + 1] === '\\')
+                    {
+                        result = `${result}${txt[i]}`;
+                        dualSlashIndex = ++i;
                     }
                 }
-                return `${rectifiedContent}</span>`;
-            };
-            return `${content}<span class="comment">${formatText(toAdd.replaceAll(' ', '&nbsp;'))}</span>`;
-        }
-    }
-};
-
-const navigateNodesHighlight = (nodes) => {
-    let result = '';
-    for(let i = 0; i < nodes.length; i++)
-    {
-        if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
-        {
-            let encodeBegin = Txt.HTMLEncode(nodes[i].begin);
-            if(nodes[i].error) // An error occured, most likely a not closed block
-            {
-                result = `${result}<span class="error">${encodeBegin}</span>`;
+                // If we're out of bounds but found no closing '
+                if(lastIndex == txt.length - 1 && txt[txt.length - 1] !== '\'')
+                {
+                    return {
+                        name: 'String Classic',
+                        error: true,
+                        content: '\'',
+                        lastIndex: index
+                    };
+                }
+                return {
+                    name: 'String Classic',
+                    content: result,
+                    lastIndex: lastIndex
+                };
             }
-            else // No error occured
+        }),
+        (content, toAdd) => {
+            let newContent = '';
+            let error = false;
+            for(let i = 0; i < toAdd.length; i++)
             {
-                result = `${result}${encodeBegin}${navigateNodesHighlight(nodes[i].content)}${Txt.HTMLEncode(nodes[i].end)}`;
+                if(toAdd[i] !== ' ' && toAdd[i] !== '\n')
+                {
+                    newContent = `${newContent}${Txt.HTMLEncode(toAdd[i])}`;
+                }
+                else
+                {
+                    let toWrite = toAdd[i];
+                    if(toAdd[i] === '\n')
+                    {
+                        error = true;
+                        toWrite = `</span>\r${toAdd[i]}<span class="error">`;
+                    }
+                    else if(toAdd[i] === ' ')
+                    {
+                        toWrite = '&nbsp;';
+                    }
+                    newContent = `${newContent}${toWrite}`;
+                }
             }
-        }
-        else // It's a string, ez pz let's write it with some spacing
-        {
-            let highlight = HighlightPattern[nodes[i].name];
-            if(highlight)
+            if(error)
             {
-                result = highlight(result, nodes[i].content, nodes[i].error);
+                return `${content}<span class="error">${newContent}</span>`;
             }
             else
             {
-                result = `${result}${Txt.HTMLEncode(nodes[i].content)}`;
+                return `${content}<span class="string">${newContent}</span>`;
             }
         }
-    }
-    return result;
-};
-const navigateNodes = (nodes) => {
-    let result = '';
-    for(let i = 0; i < nodes.length; i++)
-    {
-        if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
-        {
-            let encodeBegin = nodes[i].begin;
-            if(nodes[i].error) // An error occured, most likely a not closed block
+    ),
+    new SyntaxElement('Parenthesis', Pattern.simpleCharbox('', '(', ')')),
+    new SyntaxElement('Bracket', Pattern.simpleCharbox('', '[', ']')),
+    new SyntaxElement('Curly Bracket', Pattern.simpleCharbox('', '{', '}')),
+    new SyntaxElement('Number',
+        Pattern.number(),
+        (content, toAdd) => {
+            let encoded = Txt.HTMLEncode(toAdd);
+            return `${content}<span class="number">${encoded}</span>`;
+        }
+    ),
+    new SyntaxElement('Word',
+        Pattern.word(),
+        (content, toAdd) => {
+            let encoded = Txt.HTMLEncode(toAdd);
+            if(KEYWORDS.includes(toAdd))
             {
-                result = `${result}${encodeBegin}`;
+                return `${content}<span class="keyword">${encoded}</span>`;
             }
-            else // No error occured
+            else if(LOGICS.includes(toAdd))
             {
-                result = `${result}${encodeBegin}${navigateNodes(nodes[i].content)}${nodes[i].end}`;
+                return `${content}<span class="logic">${encoded}</span>`;
+            }
+            else if(LOGIC_CONTROLS.includes(toAdd))
+            {
+                return `${content}<span class="logcontrols">${encoded}</span>`;
+            }
+            else
+            {
+                return `${content}<span class="word">${encoded}</span>`;
             }
         }
-        else // It's a string, ez pz let's write it with some spacing
-        {
-            if(nodes[i].name === 'Comment Multiline' || nodes[i].name === 'Comment Line')
-            {
-                continue;
+    ),
+    new SyntaxElement('Punctuation', Pattern.simpleChar('', (c) => { return punctuations.includes(c); })),
+    new SyntaxElement('Symbol', Pattern.simpleChar('', (c) => { return symbols.includes(c); })),
+    new SyntaxElement('Whitespaces', new Pattern({ defaultValue: ' ',
+            isPattern: (i, c, txt) => { return whitespaces.includes(c); },
+            fetch: (index, c, txt) => {
+                let result = Txt.extractFromUntil(txt, index, (c) => {
+                    return whitespaces.includes(c);
+                });
+                let spaceResult = result.value;
+                return {
+                    name: 'Whitespaces',
+                    content: spaceResult,
+                    lastIndex: result.lastIndex
+                };
             }
-            result = `${result}${nodes[i].content}`;
-        }
-    }
-    return result;
-};
+        }),
+        (content, toAdd) => `${content}${toAdd.replaceAll(' ', '&nbsp;')}`
+    ),
+    new SyntaxElement('Controls', Pattern.simpleChar('Controls', (c) => { return controls.includes(c); }), (content, toAdd) => `${content}${toAdd}`),
+);
+
+
 function fastInput()
 {
     const generateLines = (n) => {
@@ -300,30 +246,18 @@ function fastInput()
         }
         return result;
     }
-    const formatParagraphLines = (content) =>  {
-        let rectifiedContent = '<p>';
-        for(let i = 0; i < content.length; i++)
-        {
-            if(content[i] === '\n')
-            {
-                rectifiedContent = `${rectifiedContent}</p><p>`;
-            }
-            else
-            {
-                rectifiedContent = `${rectifiedContent}${content[i]}`;
-            }
-        }
-        return `${rectifiedContent}</p>`;
-    };
-    let uInput = document.getElementById('userInput');
+    
     let editNLines = document.querySelector('.editor_linenumber');
-    let fT = document.querySelector('.format_test');
+    let uInput = document.getElementById('userInput');
     editNLines.innerHTML = generateLines(Math.max(Txt.countLines(uInput.value), 35));
+
     let clone = document.getElementById('cloneInput');
 
-    let findPattern = PatternFinder.search(uInput.value, AllBasicPatterns);
-    fT.innerText = navigateNodes(findPattern.result);
-    clone.innerHTML = formatParagraphLines(navigateNodesHighlight(findPattern.result));
+    syntax.parseSyntax(uInput.value);
+    clone.innerHTML = syntax.getHighlightedSyntax();
+
+    let fT = document.querySelector('.format_test');
+    fT.innerText = syntax.getExtractedString();
 }
 fastInput();
 
