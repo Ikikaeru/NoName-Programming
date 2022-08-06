@@ -133,8 +133,14 @@ const AllBasicPatterns = [
                 lastIndex = i;
                 if(txt[i] === '\'')
                 {
-                     // If either the previous is not \ or the previous is \ and is in reality \\
-                    if((txt[i - 1] === '\\' && dualSlashIndex != i - 1) || txt[i - 1] !== '\\')
+                    if(txt[i - 1] === '\\')
+                    {
+                        if(dualSlashIndex == i - 1)
+                        {
+                            break;
+                        }
+                    }
+                    else
                     {
                         break;
                     }
@@ -346,6 +352,8 @@ function fastInput()
     };
     let uInput = document.getElementById('userInput');
     let editNLines = document.querySelector('.editor_linenumber');
+    let fT = document.querySelector('.format_test');
+    fT.innerText = uInput.value;
     editNLines.innerHTML = generateLines(Math.max(Txt.countLines(uInput.value), 35));
     let clone = document.getElementById('cloneInput');
     clone.innerHTML = formatText(navigateNodes(LookForPattern(uInput.value, AllBasicPatterns).result));
