@@ -194,7 +194,7 @@ const AllBasicPatterns = [
     BasicPattern.simpleChar('Controls', (c) => { return controls.includes(c); })
 ];
  
-const navigateNodes = (nodes) => {
+const navigateNodesHighlight = (nodes) => {
     let result = '';
     for(let i = 0; i < nodes.length; i++)
     {
@@ -207,7 +207,7 @@ const navigateNodes = (nodes) => {
             }
             else // No error occured
             {
-                result = `${result}${encodeBegin}${navigateNodes(nodes[i].content)}${Txt.HTMLEncode(nodes[i].end)}`;
+                result = `${result}${encodeBegin}${navigateNodesHighlight(nodes[i].content)}${Txt.HTMLEncode(nodes[i].end)}`;
             }
         }
         else // It's a string, ez pz let's write it with some spacing
@@ -325,6 +325,33 @@ const navigateNodes = (nodes) => {
     }
     return result;
 };
+const navigateNodes = (nodes) => {
+    let result = '';
+    for(let i = 0; i < nodes.length; i++)
+    {
+        if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
+        {
+            let encodeBegin = nodes[i].begin;
+            if(nodes[i].error) // An error occured, most likely a not closed block
+            {
+                result = `${result}${encodeBegin}`;
+            }
+            else // No error occured
+            {
+                result = `${result}${encodeBegin}${navigateNodes(nodes[i].content)}${nodes[i].end}`;
+            }
+        }
+        else // It's a string, ez pz let's write it with some spacing
+        {
+            if(nodes[i].name === 'Comment Multiline' || nodes[i].name === 'Comment Line')
+            {
+                continue;
+            }
+            result = `${result}${nodes[i].content}`;
+        }
+    }
+    return result;
+};
 function fastInput()
 {
     const generateLines = (n) => {
@@ -353,10 +380,12 @@ function fastInput()
     let uInput = document.getElementById('userInput');
     let editNLines = document.querySelector('.editor_linenumber');
     let fT = document.querySelector('.format_test');
-    fT.innerText = uInput.value;
     editNLines.innerHTML = generateLines(Math.max(Txt.countLines(uInput.value), 35));
     let clone = document.getElementById('cloneInput');
-    clone.innerHTML = formatText(navigateNodes(LookForPattern(uInput.value, AllBasicPatterns).result));
+
+    let findPattern = LookForPattern(uInput.value, AllBasicPatterns);
+    fT.innerText = navigateNodes(uInput.value);
+    clone.innerHTML = formatText(navigateNodesHighlight(findPattern.result));
 }
 fastInput();
 
