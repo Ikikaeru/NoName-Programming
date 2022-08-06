@@ -5,7 +5,7 @@ class PatternFinder {
      * @param {BasicPattern[]} patternSet A list of different pattern to compute.
      * @param {number} i The index with default value to 0. Can be modified for nested searching.
      * @param {(index: number, c: char, text: string) => boolean} endPattern A function to check if a pattern ended.
-     * @return {{isPatternEnd: boolean, result: {name:string, content:any}[], lastIndex: number}} Return an object representing the value parsed.
+     * @return {{isPatternEnd: boolean, result: PatternFound[], lastIndex: number}} Return an object representing the value parsed.
      */
     static search(txtContent, patternSet, i = 0, endPattern = (i, c, t) => { return false; })
     {
@@ -28,7 +28,7 @@ class PatternFinder {
                     let lineData = Txt.countLinesChar(txtContent, i);
                     let fetchResult = patternSet[j].fetchContent(i, txtContent[i], txtContent, patternSet, patternSet[j]); // Execute something then return the fetched result
                     i = fetchResult.lastIndex; // Assign the new index
-                    let resultObject = {
+                    let resultObject = new PatternFound({
                         name: patternSet[j].name,
                         currentName: fetchResult.name,
                         begin: fetchResult.begin,
@@ -38,7 +38,7 @@ class PatternFinder {
                         error: fetchResult.error,
                         line: lineData.line,
                         lineChar: lineData.lineChar
-                    };
+                    });
                     subdivided.push(resultObject); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
                     break; // No need to check more pattern, we've got one already
                 }
