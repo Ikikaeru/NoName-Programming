@@ -9,13 +9,13 @@ const letters = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 
 ];
 const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 /**
- * BasicPattern is a generic class made to check for pattern while looking inside a string.
+ * Pattern is a generic class made to check for pattern while looking inside a string.
  * It fetch it's inner value with the pattern founded and then return it's last index.
  */
- class BasicPattern
+ class Pattern
  {
     /**
-     * Create a basic pattern object with a bunch of parameters for full customisation.
+     * Create a pattern object with a bunch of parameters for full customisation.
      * @param {{name: string, defaultValue: any, isPattern: (i: number, c: char, t: string) => boolean, isPatternEnd: (i: number, c: char, t: string) => boolean, fetch: (i: number, c: char, t: string) => {lastIndex: number, content: any}} pattern 
      */
     constructor(pattern)
@@ -84,7 +84,7 @@ const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
      */
     static simpleChar(name, predicate)
     {
-        return new BasicPattern({
+        return new Pattern({
             name: name,
             defaultValue: null,
             isPattern: (i, c, txt) => { return predicate(c); },
@@ -102,7 +102,7 @@ const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
      */
     static simpleCharbox(name, begin, end)
     {
-        return new BasicPattern({
+        return new Pattern({
             name: name,
             defaultValue: begin,
             begin: begin,
@@ -110,7 +110,7 @@ const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             isPattern: (i, c, txt) => { return c === begin; },
             isPatternEnd: (i, c, txt) => { return c === end; },
             fetch: (index, c, txt, endPattern, patternSet) => {
-                let p = LookForPattern(txt, patternSet, index + 1, endPattern); // Let's look for nested pattern over here..
+                let p = PatternFinder.search(txt, patternSet, index + 1, endPattern); // Let's look for nested pattern over here..
                 // We could filter patternSet if we wanted to get rid of some functions for this case or use whatever we want anyway.
                 if(p.isPatternEnd) // It's the end of our pattern
                 {
@@ -145,7 +145,7 @@ const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
      */
     static word()
     {
-        return new BasicPattern({
+        return new Pattern({
             name: 'Word',
             defaultValue: '',
             isPattern: (i, c, txt) => { return letters.includes(c); },
@@ -177,7 +177,7 @@ const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     static number(comaOverDot = false)
     {
         let dot = comaOverDot ? ',' : '.';
-        return new BasicPattern({
+        return new Pattern({
             name: 'Number',
             defaultValue: 0,
             isPattern: (i, c, txt) => {

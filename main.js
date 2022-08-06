@@ -17,59 +17,11 @@ const LOGIC_CONTROLS = [
 ];
 const logs = [];
 
- /**
-  * A function made to look for specific pattern
-  * @param {string} txtContent The string we're currently parsing.
-  * @param {BasicPattern[]} patternSet A list of different pattern to compute.
-  * @param {number} i The index with default value to 0. Can be modified for nested searching.
-  * @param {(index: number, c: char, text: string) => boolean} endPattern A function to check if a pattern ended.
-  * @return {{isPatternEnd: boolean, result: {name:string, content:any}[], lastIndex: number}} Return an object representing the value parsed.
-  */
-function LookForPattern(txtContent, patternSet, i = 0, endPattern = (i, c, t) => { return false; })
-{
-    let subdivided = []; // A result called subdivided since it's the input subdivided in multiple pieces.
-    
-    for(; i < txtContent.length; i++) // Let's navigate the input
-    {
-        if(endPattern(i, txtContent[i], txtContent)) // We're in a nested pattern that just ended
-        {
-            return { // We're gonna return that we're inside an ended pattern, the result and the last index visited
-                isPatternEnd: true,
-                result: subdivided,
-                lastIndex: i
-            };
-        }
-        for(let j = 0; j < patternSet.length; j++) // Let's check all the possible patterns
-        {
-            if(patternSet[j].isActualPattern(i, txtContent[i], txtContent)) // It's the pattern, let's execute something
-            {
-                let fetchResult = patternSet[j].fetchContent(i, txtContent[i], txtContent, patternSet, patternSet[j]); // Execute something then return the fetched result
-                i = fetchResult.lastIndex; // Assign the new index
-                subdivided.push({
-                    name: patternSet[j].name,
-                    currentName: fetchResult.name,
-                    begin: fetchResult.begin,
-                    end: fetchResult.end,
-                    nested: fetchResult.nested,
-                    error: fetchResult.error,
-                    content: fetchResult.content
-                }); // Insert an array of 2 elements (name and content) of the tested pattern inside our subdivided variable.
-                break; // No need to check more pattern, we've got one already
-            }
-        }
-    }
-    return { // We've done it 'till the end, no pattern ended over here
-        isPatternEnd: false,
-        result: subdivided,
-        lastIndex: i - 1
-    };
-}
-
 /*
     PATTERNS
 */
 const AllBasicPatterns = [
-    new BasicPattern({ name: 'Comment Line', defaultValue: '//',
+    new Pattern({ name: 'Comment Line', defaultValue: '//',
         isPattern: (i, c, txt) => { return c === '/' && i + 1 < txt.length && txt[i + 1] === '/'; },
         fetch: (index, c, txt) => {
             let result = '//';
@@ -90,7 +42,7 @@ const AllBasicPatterns = [
             };
         }
     }),
-    new BasicPattern({ name: 'Comment Multiline', defaultValue: '/*',
+    new Pattern({ name: 'Comment Multiline', defaultValue: '/*',
         isPattern: (i, c, txt) => { return txt[i] === '/' && i + 1 < txt.length && txt[i + 1] === '*'; },
         fetch: (index, c, txt) => {
             let result = '/*';
@@ -121,7 +73,7 @@ const AllBasicPatterns = [
             };
         }
     }),
-    new BasicPattern({ name: 'String Classic', defaultValue: '\'',
+    new Pattern({ name: 'String Classic', defaultValue: '\'',
         isPattern: (i, c, txt) => { return c === '\''; },
         fetch: (index, c, txt) => {
             let result = '\'';
@@ -169,15 +121,14 @@ const AllBasicPatterns = [
             };
         }
     }),
-    BasicPattern.simpleCharbox('DoubleParenthesis', '((', '))'),
-    BasicPattern.simpleCharbox('Parenthesis', '(', ')'),
-    BasicPattern.simpleCharbox('Bracket', '[', ']'),
-    BasicPattern.simpleCharbox('Curly Bracket', '{', '}'),
-    BasicPattern.number(),
-    BasicPattern.word(),
-    BasicPattern.simpleChar('Punctuation', (c) => { return punctuations.includes(c); }),
-    BasicPattern.simpleChar('Symbol', (c) => { return symbols.includes(c); }),
-    new BasicPattern({ name: 'Whitespaces', defaultValue: ' ',
+    Pattern.simpleCharbox('Parenthesis', '(', ')'),
+    Pattern.simpleCharbox('Bracket', '[', ']'),
+    Pattern.simpleCharbox('Curly Bracket', '{', '}'),
+    Pattern.number(),
+    Pattern.word(),
+    Pattern.simpleChar('Punctuation', (c) => { return punctuations.includes(c); }),
+    Pattern.simpleChar('Symbol', (c) => { return symbols.includes(c); }),
+    new Pattern({ name: 'Whitespaces', defaultValue: ' ',
         isPattern: (i, c, txt) => { return whitespaces.includes(c); },
         fetch: (index, c, txt) => {
             let result = Txt.extractFromUntil(txt, index, (c) => {
@@ -191,13 +142,36 @@ const AllBasicPatterns = [
             };
         }
     }),
-    BasicPattern.simpleChar('Controls', (c) => { return controls.includes(c); })
+    Pattern.simpleChar('Controls', (c) => { return controls.includes(c); })
 ];
 
 const HighlightPattern = {
     'Controls': (content, toAdd) => `${content}${toAdd}`,
     'Whitespaces': (content, toAdd) => `${content}${toAdd.replaceAll(' ', '&nbsp;')}`,
     'Comment Line': (content, toAdd) => `${content}<span class="comment">${toAdd.replaceAll(' ', '&nbsp;')}</span>`,
+    'Number': (content, toAdd) => {
+        let encoded = Txt.HTMLEncode(toAdd);
+        return `${content}<span class="number">${encoded}</span>`;
+    },
+    'Word': (content, toAdd) => {
+        let encoded = Txt.HTMLEncode(toAdd);
+        if(KEYWORDS.includes(toAdd))
+        {
+            return `${content}<span class="keyword">${encoded}</span>`;
+        }
+        else if(LOGICS.includes(toAdd))
+        {
+            return `${content}<span class="logic">${encoded}</span>`;
+        }
+        else if(LOGIC_CONTROLS.includes(toAdd))
+        {
+            return `${content}<span class="logcontrols">${encoded}</span>`;
+        }
+        else
+        {
+            return `${content}<span class="word">${encoded}</span>`;
+        }
+    },
     'String Classic': (content, toAdd) => {
         let newContent = '';
         let error = false;
@@ -255,29 +229,6 @@ const HighlightPattern = {
             };
             return `${content}<span class="comment">${formatText(toAdd.replaceAll(' ', '&nbsp;'))}</span>`;
         }
-    },
-    'Word': (content, toAdd) => {
-        let encoded = Txt.HTMLEncode(toAdd);
-        if(KEYWORDS.includes(toAdd))
-        {
-            return `${content}<span class="keyword">${encoded}</span>`;
-        }
-        else if(LOGICS.includes(toAdd))
-        {
-            return `${content}<span class="logic">${encoded}</span>`;
-        }
-        else if(LOGIC_CONTROLS.includes(toAdd))
-        {
-            return `${content}<span class="logcontrols">${encoded}</span>`;
-        }
-        else
-        {
-            return `${content}<span class="word">${encoded}</span>`;
-        }
-    },
-    'Number': (content, toAdd) => {
-        let encoded = Txt.HTMLEncode(toAdd);
-        return `${content}<span class="number">${encoded}</span>`;
     }
 };
 
@@ -349,7 +300,7 @@ function fastInput()
         }
         return result;
     }
-    const formatText = (content) =>  {
+    const formatParagraphLines = (content) =>  {
         let rectifiedContent = '<p>';
         for(let i = 0; i < content.length; i++)
         {
@@ -370,39 +321,15 @@ function fastInput()
     editNLines.innerHTML = generateLines(Math.max(Txt.countLines(uInput.value), 35));
     let clone = document.getElementById('cloneInput');
 
-    let findPattern = LookForPattern(uInput.value, AllBasicPatterns);
+    let findPattern = PatternFinder.search(uInput.value, AllBasicPatterns);
     fT.innerText = navigateNodes(findPattern.result);
-    clone.innerHTML = formatText(navigateNodesHighlight(findPattern.result));
+    clone.innerHTML = formatParagraphLines(navigateNodesHighlight(findPattern.result));
 }
 fastInput();
 
-HTMLTextAreaElement.prototype.getCaretPosition = function () { //return the caret position of the textarea
-    return this.selectionStart;
-};
-HTMLTextAreaElement.prototype.setCaretPosition = function (position) { //change the caret position of the textarea
-    this.selectionStart = position;
-    this.selectionEnd = position;
-    this.focus();
-};
-HTMLTextAreaElement.prototype.hasSelection = function () { //if the textarea has selection then return true
-    if (this.selectionStart == this.selectionEnd) {
-        return false;
-    } else {
-        return true;
-    }
-};
-HTMLTextAreaElement.prototype.getSelectedText = function () { //return the selection text
-    return this.value.substring(this.selectionStart, this.selectionEnd);
-};
-HTMLTextAreaElement.prototype.setSelection = function (start, end) { //change the selection area of the textarea
-    this.selectionStart = start;
-    this.selectionEnd = end;
-    this.focus();
-};
-
 const userInput = document.getElementById('userInput');
 userInput.addEventListener('input', (e) => {
-    userInput.style.height = userInput.scrollHeight+'px';
+    userInput.style.height = userInput.scrollHeight + 'px';
     fastInput();
 });
 userInput.addEventListener('keydown', event => {
@@ -411,13 +338,13 @@ userInput.addEventListener('keydown', event => {
         newCaretPosition = userInput.getCaretPosition() + 4;
         userInput.value = userInput.value.substring(0, userInput.getCaretPosition()) + "    " + userInput.value.substring(userInput.getCaretPosition(), userInput.value.length);
         userInput.setCaretPosition(newCaretPosition);
-        userInput.style.height = userInput.scrollHeight+'px';
+        userInput.style.height = userInput.scrollHeight + 'px';
         event.preventDefault();
         fastInput();
     }
 });
 userInput.addEventListener('scroll', (e) => {
     let backdrop = document.getElementById('cloneInput');
-    userInput.style.height = userInput.scrollHeight+'px';
+    userInput.style.height = userInput.scrollHeight + 'px';
     userInput.scroll(backdrop.scrollLeft, backdrop.scrollTop);
 });
