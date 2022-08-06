@@ -76,12 +76,12 @@ const AllBasicPatterns = [
             let lastIndex = index;
             for(let i = index + 2; i < txt.length; i++)
             {
-                result = `${result}${txt[i]}`;
-                lastIndex = i;
                 if(txt[i] === '\n')
                 {
                     break;
                 }
+                result = `${result}${txt[i]}`;
+                lastIndex = i;
             }
             return {
                 name: 'Comment Line',
@@ -384,7 +384,7 @@ function fastInput()
     let clone = document.getElementById('cloneInput');
 
     let findPattern = LookForPattern(uInput.value, AllBasicPatterns);
-    fT.innerText = navigateNodes(uInput.value);
+    fT.innerText = navigateNodes(findPattern.result);
     clone.innerHTML = formatText(navigateNodesHighlight(findPattern.result));
 }
 fastInput();
