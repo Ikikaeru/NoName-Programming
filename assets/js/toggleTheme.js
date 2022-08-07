@@ -1,5 +1,6 @@
 
 const toggleTheme = (theme) => {
+    const html = document.querySelector('html');
     const body = document.querySelector('body');
     const editor = document.querySelector('.editor');
     const editor_linenumber = document.querySelector('.editor_linenumber');
@@ -7,6 +8,9 @@ const toggleTheme = (theme) => {
     const editor_container_inputarea = document.querySelector('.editor_container_inputarea');
     if(theme === 'light') // Switch to dark mode
     {
+        // HTML
+        html.classList.remove('light');
+        html.classList.add('dark');
         // BODY
         body.classList.remove('light');
         body.classList.add('dark');
@@ -25,6 +29,9 @@ const toggleTheme = (theme) => {
     }
     else // Switch to light mode
     {
+        // HTML
+        html.classList.remove('dark');
+        html.classList.add('light');
         // BODY
         body.classList.remove('dark');
         body.classList.add('light');

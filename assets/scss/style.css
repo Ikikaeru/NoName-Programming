@@ -8,6 +8,81 @@ body {
   font-family: "Courier New", Courier, monospace;
 }
 
+/*
+    Generate theme
+*/
+html.dark, body.dark, .editor.dark {
+  scrollbar-color: rgb(153, 153, 153) rgb(17, 17, 17) !important;
+}
+html.dark::-webkit-scrollbar-thumb, body.dark::-webkit-scrollbar-thumb, .editor.dark::-webkit-scrollbar-thumb {
+  background-color: rgb(153, 153, 153);
+}
+html.dark::-webkit-scrollbar-thumb:hover, body.dark::-webkit-scrollbar-thumb:hover, .editor.dark::-webkit-scrollbar-thumb:hover {
+  background: rgb(119, 119, 119);
+}
+
+body.dark {
+  background-color: rgb(17, 17, 17);
+  color: rgb(236, 236, 236);
+}
+
+.editor.dark {
+  border: medium double rgb(51, 51, 51);
+}
+
+.editor_linenumber.dark > p {
+  border-right: medium double rgb(51, 51, 51);
+}
+
+.editor_linenumber.dark p, .editor_container_backdrop.dark p {
+  background-color: rgb(32, 32, 32);
+}
+.editor_linenumber.dark p:nth-child(2n), .editor_container_backdrop.dark p:nth-child(2n) {
+  background-color: rgb(27, 27, 27);
+}
+
+.editor_container_inputarea.dark {
+  caret-color: rgb(236, 236, 236);
+}
+
+html.light, body.light, .editor.light {
+  scrollbar-color: rgb(102, 102, 102) rgb(238, 238, 238) !important;
+}
+html.light::-webkit-scrollbar-thumb, body.light::-webkit-scrollbar-thumb, .editor.light::-webkit-scrollbar-thumb {
+  background-color: rgb(102, 102, 102);
+}
+html.light::-webkit-scrollbar-thumb:hover, body.light::-webkit-scrollbar-thumb:hover, .editor.light::-webkit-scrollbar-thumb:hover {
+  background: rgb(136, 136, 136);
+}
+
+body.light {
+  background-color: rgb(238, 238, 238);
+  color: rgb(19, 19, 19);
+}
+
+.editor.light {
+  border: medium double rgb(204, 204, 204);
+}
+
+.editor_linenumber.light > p {
+  border-right: medium double rgb(204, 204, 204);
+}
+
+.editor_linenumber.light p, .editor_container_backdrop.light p {
+  background-color: rgb(223, 223, 223);
+}
+.editor_linenumber.light p:nth-child(2n), .editor_container_backdrop.light p:nth-child(2n) {
+  background-color: rgb(228, 228, 228);
+}
+
+.editor_container_inputarea.light {
+  caret-color: rgb(19, 19, 19);
+}
+
+.editor_container_inputarea {
+  color: transparent;
+}
+
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -26,77 +101,12 @@ body {
   border-width: 5px 4px;
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #999;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #777;
-}
-
 :root {
-  scrollbar-color: #999 rgb(17, 17, 17) !important;
   scrollbar-width: thin !important;
 }
 
 .editor {
-  scrollbar-color: #999 rgb(17, 17, 17) !important;
   scrollbar-width: thin !important;
-}
-
-/*
-    Generate theme
-*/
-body.dark {
-  background-color: rgb(17, 17, 17);
-  color: rgb(236, 236, 236);
-}
-
-.editor.dark {
-  border: medium double rgb(51, 51, 51);
-}
-
-.editor_linenumber.dark > p {
-  border-right: medium double rgb(51, 51, 51);
-}
-
-.editor_linenumber.dark p, .editor_container_backdrop.dark p {
-  background-color: rgb(39, 39, 39);
-}
-.editor_linenumber.dark p:nth-child(2n), .editor_container_backdrop.dark p:nth-child(2n) {
-  background-color: rgb(27, 27, 27);
-}
-
-.editor_container_inputarea.dark {
-  caret-color: rgb(236, 236, 236);
-}
-
-body.light {
-  background-color: rgb(238, 238, 238);
-  color: rgb(19, 19, 19);
-}
-
-.editor.light {
-  border: medium double rgb(204, 204, 204);
-}
-
-.editor_linenumber.light > p {
-  border-right: medium double rgb(204, 204, 204);
-}
-
-.editor_linenumber.light p, .editor_container_backdrop.light p {
-  background-color: rgb(216, 216, 216);
-}
-.editor_linenumber.light p:nth-child(2n), .editor_container_backdrop.light p:nth-child(2n) {
-  background-color: rgb(228, 228, 228);
-}
-
-.editor_container_inputarea.light {
-  caret-color: rgb(19, 19, 19);
-}
-
-.editor_container_inputarea {
-  color: transparent;
 }
 
 .error {
@@ -107,24 +117,8 @@ body.light {
   color: green;
 }
 
-.string {
-  color: orange;
-}
-
 .word {
   color: blueviolet;
-}
-
-.varword {
-  color: cyan;
-}
-
-.keyword {
-  color: rgb(218, 75, 142);
-}
-
-.number {
-  color: rgb(230, 207, 179);
 }
 
 .logic {
@@ -132,7 +126,33 @@ body.light {
 }
 
 .logcontrols {
-  color: rgb(248, 62, 140);
+  color: rgb(168, 63, 133);
+}
+
+#cloneInput.dark > p .string {
+  color: orange;
+}
+#cloneInput.dark > p .varword {
+  color: cyan;
+}
+#cloneInput.dark > p .number {
+  color: rgb(230, 207, 179);
+}
+#cloneInput.dark > p .keyword {
+  color: rgb(241, 75, 152);
+}
+
+#cloneInput.light > p .string {
+  color: rgb(194, 126, 0);
+}
+#cloneInput.light > p .varword {
+  color: rgb(39, 119, 119);
+}
+#cloneInput.light > p .number {
+  color: rgb(153, 116, 70);
+}
+#cloneInput.light > p .keyword {
+  color: rgb(104, 2, 163);
 }
 
 .editor > .editor_linenumber > p {

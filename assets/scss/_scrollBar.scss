@@ -12,3 +12,10 @@
 ::-webkit-scrollbar-thumb:vertical {
     border-width: 5px 4px;
 }
+// Scrollbar width support for firefox
+:root {
+    scrollbar-width: thin !important;
+}
+.editor {
+    scrollbar-width: thin !important;
+}

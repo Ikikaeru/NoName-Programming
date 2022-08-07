@@ -2,8 +2,10 @@
 $themes: 'dark', 'light';
 $theme_linear_bgcolor: 17;
 $theme_linear_color: 236;
-$theme_oddLine_bgcolor: 39;
+$theme_oddLine_bgcolor: 32;
 $theme_evenLine_bgcolor: 27;
+$theme_scrollbar_color: 153; // 153
+$theme_scrollbar_hovercolor: 119; // 119
 
 @function darkLight($theme, $color) {
     @if $theme == 'dark' {
@@ -12,28 +14,21 @@ $theme_evenLine_bgcolor: 27;
         @return rgb(255 - $color, 255 - $color, 255 - $color);
     }
 }
-$scrollbar_color: #999;
-$scrollbar_hovercolor: #777;
-// Color support for scrollbar
-::-webkit-scrollbar-thumb {
-    background-color:$scrollbar_color;
-}
-::-webkit-scrollbar-thumb:hover {
-    background:$scrollbar_hovercolor;
-}
-// Color support for firefox scrollbar
-:root {
-    scrollbar-color: $scrollbar_color rgb($theme_linear_bgcolor, $theme_linear_bgcolor, $theme_linear_bgcolor) !important;
-    scrollbar-width: thin !important;
-}
-.editor {
-    scrollbar-color: $scrollbar_color rgb($theme_linear_bgcolor, $theme_linear_bgcolor, $theme_linear_bgcolor) !important;
-    scrollbar-width: thin !important;
-}
 /*
     Generate theme
 */
 @each $theme in $themes {
+    html.#{$theme}, body.#{$theme}, .editor.#{$theme} {
+        // Color support for firefox scrollbar
+        scrollbar-color: darkLight($theme, $theme_scrollbar_color) darkLight($theme, $theme_linear_bgcolor) !important;
+        // Color support for scrollbar
+        &::-webkit-scrollbar-thumb {
+            background-color: darkLight($theme, $theme_scrollbar_color);
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background: darkLight($theme, $theme_scrollbar_hovercolor);
+        }
+    }
     body.#{$theme} {
         background-color: darkLight($theme, $theme_linear_bgcolor);
         color: darkLight($theme, $theme_linear_color);
