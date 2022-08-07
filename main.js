@@ -11,7 +11,6 @@ const LOGICS = [
 const LOGIC_CONTROLS = [
     'return', 'break', 'continue'
 ];
-const logs = [];
 
 const syntax = new SyntaxMaker(
     new SyntaxElement('Comment Line',
@@ -329,33 +328,33 @@ userInput.addEventListener('input', (e) => {
     userInput.style.height = userInput.scrollHeight + 'px';
     fastInput();
 });
+const tabLength = 4;
 userInput.addEventListener('keydown', event => {
     if (event.key === 'Tab') {
         let newCaretPosition;
         let caretPos = userInput.getCaretPosition();
         const carretContent = userInput.value.substring(0, caretPos);
+        let move = 0;
         if(event.shiftKey)
         {
-            let backwardMove = 0;
-            for(let i = carretContent.length - 1; i >= carretContent.length - 4 && i >= 0; i--)
+            for(let i = carretContent.length - 1; i >= carretContent.length - tabLength && i >= 0; i--)
             {
                 if(carretContent[i] !== ' ')
                 {
                     if(carretContent[i] !== '\n')
                     {
-                        backwardMove--;
+                        move--;
                     }
                     break;
                 }
-                backwardMove++;
+                move++;
             }
-            if(backwardMove < 0)
+            if(move < 0)
             {
-                backwardMove = 0;
+                move = 0;
             }
-            userInput.value = userInput.value.substring(0, caretPos - backwardMove) + userInput.value.substring(caretPos, userInput.value.length);
-            newCaretPosition = caretPos - backwardMove;
-            userInput.setCaretPosition(newCaretPosition);
+            userInput.value = userInput.value.substring(0, caretPos - move) + userInput.value.substring(caretPos, userInput.value.length);
+            newCaretPosition = caretPos - move;
         }
         else
         {
@@ -368,8 +367,7 @@ userInput.addEventListener('keydown', event => {
                 }
                 letterTillLine++;
             }
-            let nbrToAppend = 4 - (letterTillLine % 4);
-            newCaretPosition = userInput.getCaretPosition() + nbrToAppend;
+            move = tabLength - (letterTillLine % tabLength);
             const generateSpace = (n) => {
                 let r = '';
                 while(n > 0)
@@ -379,9 +377,10 @@ userInput.addEventListener('keydown', event => {
                 }
                 return r;
             }
-            userInput.value = userInput.value.substring(0, userInput.getCaretPosition()) + generateSpace(nbrToAppend) + userInput.value.substring(userInput.getCaretPosition(), userInput.value.length);
-            userInput.setCaretPosition(newCaretPosition);
+            userInput.value = userInput.value.substring(0, caretPos) + generateSpace(move) + userInput.value.substring(caretPos, userInput.value.length);
+            newCaretPosition = caretPos + move;
         }
+        userInput.setCaretPosition(newCaretPosition);
         event.preventDefault();
         userInput.style.height = userInput.scrollHeight + 'px';
         fastInput();
