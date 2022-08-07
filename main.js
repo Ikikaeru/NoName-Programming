@@ -311,6 +311,7 @@ function fastInput()
     
     let editNLines = document.querySelector('.editor_linenumber');
     let uInput = document.getElementById('userInput');
+    uInput.style.height = uInput.scrollHeight + 'px';
     editNLines.innerHTML = generateLines(Math.max(Txt.countLines(uInput.value), 35));
 
     let clone = document.getElementById('cloneInput');
@@ -334,9 +335,10 @@ function fastInput()
 fastInput();
 
 const userInput = document.getElementById('userInput');
+const lineNbr = document.querySelector('.editor_linenumber');
 userInput.addEventListener('input', (e) => {
-    userInput.style.height = userInput.scrollHeight + 'px';
     fastInput();
+    userInput.style.height = lineNbr.scrollHeight + 'px';
 });
 const tabLength = 4;
 userInput.addEventListener('keydown', event => {
@@ -392,12 +394,13 @@ userInput.addEventListener('keydown', event => {
         }
         userInput.setCaretPosition(newCaretPosition);
         event.preventDefault();
-        userInput.style.height = userInput.scrollHeight + 'px';
+        userInput.style.height = lineNbr.scrollHeight + 'px';
         fastInput();
     }
+    userInput.style.height = lineNbr.scrollHeight + 'px';
 });
 userInput.addEventListener('scroll', (e) => {
     let backdrop = document.getElementById('cloneInput');
-    userInput.style.height = userInput.scrollHeight + 'px';
+    userInput.style.height = lineNbr.scrollHeight + 'px';
     userInput.scroll(backdrop.scrollLeft, backdrop.scrollTop);
 });

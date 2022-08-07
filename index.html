@@ -12,30 +12,15 @@
         <script src="assets/js/patternFound.js"></script>
         <script src="assets/js/syntaxElement.js"></script>
         <script src="assets/js/syntaxMaker.js"></script>
+        <script defer src="assets/js/toggleTheme.js"></script>
         <script defer src="main.js"></script>
     </head>
     <body>
-        <!--
-        <h1>Pattern Matching</h1>
-        <h2>Input:</h2>
         <div class="editor">
-            <div class="editor_linenumber"> </div>
-            <div class="container">
-                <textarea id="userInput" spellcheck="false">Hello World.</textarea>
-                <div class="backdrop">
-                  <div id="cloneInput" class="highlights"></div>
-                </div>
-            </div>
-        </div>
-        <h2>Log:</h2>
-        <div class="errorOutput"></div>
-        <h2>Output:</h2>
-        <div class="userOutput"></div>-->
-<div class="editor">
-    <div class="editor_linenumber"></div>
-    <div class="editor_container">
-        <textarea id="userInput" class="editor_container_inputarea"
-            spellcheck="false">
+            <div class="editor_linenumber"></div>
+            <div class="editor_container">
+                <textarea id="userInput" class="editor_container_inputarea"
+                    spellcheck="false">
 HTMLTextAreaElement.prototype.getCaretPosition = function () { //return the caret position of the textarea
     return this.selectionStart;
 };
@@ -80,11 +65,10 @@ userInput.addEventListener('scroll', (e) => {
     let backdrop = document.getElementById('cloneInput');
     userInput.style.height = userInput.scrollHeight+'px';
     userInput.scroll(backdrop.scrollLeft, backdrop.scrollTop);
-});
-            </textarea>
-        <div id="cloneInput" class="editor_container_backdrop"></div>
-    </div>
-</div>
-<pre class="format_test"></pre>
+});</textarea>
+                <div id="cloneInput" class="editor_container_backdrop"></div>
+            </div>
+        </div>
+        <pre class="format_test"></pre>
     </body>
 </html>

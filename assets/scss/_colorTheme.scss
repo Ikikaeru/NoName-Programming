@@ -1,0 +1,61 @@
+// Dark theme by default
+$themes: 'dark', 'light';
+$theme_linear_bgcolor: 17;
+$theme_linear_color: 236;
+$theme_oddLine_bgcolor: 39;
+$theme_evenLine_bgcolor: 27;
+
+@function darkLight($theme, $color) {
+    @if $theme == 'dark' {
+        @return rgb($color, $color, $color);
+    } @else {
+        @return rgb(255 - $color, 255 - $color, 255 - $color);
+    }
+}
+$scrollbar_color: #999;
+$scrollbar_hovercolor: #777;
+// Color support for scrollbar
+::-webkit-scrollbar-thumb {
+    background-color:$scrollbar_color;
+}
+::-webkit-scrollbar-thumb:hover {
+    background:$scrollbar_hovercolor;
+}
+// Color support for firefox scrollbar
+:root {
+    scrollbar-color: $scrollbar_color rgb($theme_linear_bgcolor, $theme_linear_bgcolor, $theme_linear_bgcolor) !important;
+    scrollbar-width: thin !important;
+}
+.editor {
+    scrollbar-color: $scrollbar_color rgb($theme_linear_bgcolor, $theme_linear_bgcolor, $theme_linear_bgcolor) !important;
+    scrollbar-width: thin !important;
+}
+/*
+    Generate theme
+*/
+@each $theme in $themes {
+    body.#{$theme} {
+        background-color: darkLight($theme, $theme_linear_bgcolor);
+        color: darkLight($theme, $theme_linear_color);
+    }
+    .editor.#{$theme} {
+        border: medium double darkLight($theme, $theme_linear_bgcolor * 3);
+    }
+    .editor_linenumber.#{$theme} > p {
+        border-right: medium double darkLight($theme, $theme_linear_bgcolor * 3);
+    }
+    .editor_linenumber.#{$theme}, .editor_container_backdrop.#{$theme} {
+        p {
+            background-color: darkLight($theme, $theme_oddLine_bgcolor);
+        }
+        p:nth-child(2n) {
+            background-color: darkLight($theme, $theme_evenLine_bgcolor);
+        }
+    }
+    .editor_container_inputarea.#{$theme} {
+        caret-color: darkLight($theme, $theme_linear_color);
+    }
+}
+.editor_container_inputarea {
+    color: transparent;
+}
