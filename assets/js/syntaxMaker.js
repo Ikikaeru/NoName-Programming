@@ -55,6 +55,10 @@ class SyntaxMaker {
             lastIndex: i - 1
         };
     }
+    Nodes()
+    {
+        return this.nodes;
+    }
     parseSyntax(txt)
     {
         const patternSet = [];
@@ -119,33 +123,60 @@ class SyntaxMaker {
     }
     getExtractedString()
     {
-        const extractString = (nodes) => {
-            let result = '';
-            for(let i = 0; i < nodes.length; i++)
+        return this.extractString(this.nodes);
+    }
+    static extractString(nodes, spacing = false, depth = 0)
+    {
+        const generateSpace = (d) => {
+            let spacing = '';
+            for(let i = 0; i < d; i++)
             {
-                if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
+                spacing = `${spacing}    `;
+            }
+            return spacing;
+        }
+        let space = spacing ? generateSpace(depth) : '';
+        let lineReturn = spacing ? '\n' : '';
+        let result = '';
+        for(let i = 0; i < nodes.length; i++)
+        {
+            if(nodes[i].nested) // This node is a sub element (an array if nothing goes wrong)
+            {
+                result = `${result}${space}${nodes[i].begin}${lineReturn}`;
+                if(!nodes[i].error)
                 {
-                    let encodeBegin = nodes[i].begin;
-                    if(nodes[i].error) // An error occured, most likely a not closed block
-                    {
-                        result = `${result}${encodeBegin}`;
-                    }
-                    else // No error occured
-                    {
-                        result = `${result}${encodeBegin}${extractString(nodes[i].content)}${nodes[i].end}`;
-                    }
-                }
-                else // It's a string, ez pz let's write it with some spacing
-                {
-                    result = `${result}${nodes[i].content}`;
+                    result = `${result}${this.extractString(nodes[i].content, spacing, depth + 1)}${lineReturn}${space}${nodes[i].end}${lineReturn}`;
                 }
             }
-            return result;
+            else // It's a string, ez pz let's write it with some spacing
+            {
+                result = `${result}${space}${nodes[i].content}${lineReturn}`;
+            }
         }
-        return extractString(this.nodes);
+        return result;
     }
-    computeSyntax(nodes)
+    static filter(nodes, predicate)
     {
-
+        let result = [];
+        for(let i = 0; i < nodes.length; i++)
+        {
+            if(predicate(nodes[i]))
+            {
+                if(nodes[i].nested)
+                {
+                    nodes[i].content = this.filter(nodes[i].content, predicate);
+                }
+                result.push(nodes[i]);
+            }
+        }
+        return result;
+    }
+    filterSyntax(predicate)
+    {
+        this.nodes = filter(this.nodes, predicate);
+    }
+    computeSyntax(execute)
+    {
+        this.nodes = execute(this.nodes);
     }
 }

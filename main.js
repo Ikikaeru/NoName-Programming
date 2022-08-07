@@ -231,7 +231,7 @@ const syntax = new SyntaxMaker(
         new Pattern({
             defaultValue: '',
             isPattern: (i, c, txt) => {
-                return Txt.variables.includes(c) || c === '$' || c === '_';
+                return Txt.variables.includes(c);
             },
             fetch: (index, c, txt) => {
                 let result = {
@@ -268,7 +268,7 @@ const syntax = new SyntaxMaker(
             }
             else
             {
-                return `${content}<span class="word">${encoded}</span>`;
+                return `${content}<span class="varword">${encoded}</span>`;
             }
         }
     ),
@@ -319,7 +319,17 @@ function fastInput()
     clone.innerHTML = syntax.getHighlightedSyntax();
 
     let fT = document.querySelector('.format_test');
-    fT.innerText = syntax.getExtractedString();
+
+    // Functions
+    const filterComment = (node) => {
+        return node.name !== 'Comment Multiline' && node.name !== 'Comment Line' && node.name !== 'Controls' && node.name !== 'Whitespaces';
+    };
+
+    // Steps
+    let filterSyntax = SyntaxMaker.filter(syntax.Nodes(), filterComment);
+
+    // Generated
+    fT.innerText = SyntaxMaker.extractString(filterSyntax, true);
 }
 fastInput();
 

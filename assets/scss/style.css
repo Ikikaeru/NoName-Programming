@@ -22,6 +22,10 @@ body {
 }
 
 .word {
+  color: blueviolet;
+}
+
+.varword {
   color: cyan;
 }
 
