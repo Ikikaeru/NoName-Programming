@@ -3,6 +3,24 @@
  */
 class Txt
 {
+    static letters = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                        'á', 'à', 'ä', 'â',
+                        'é', 'è', 'ë', 'ê',
+                        'í', 'ì', 'ï', 'î',
+                        'ó', 'ò', 'ö', 'ô',
+                        'ú', 'ù', 'ü', 'û',
+                        'Ç', 'ç'
+    ];
+    static digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    static variables = [   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        '_', '$', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+    ];
+    static controls = [ '\n', '\t' ];
+    static whitespaces = [ ' ' ];
+    static symbols = [ '§', '@', '¥', '€', '¬', '&', '|', '#', '^', '*', '$', '%', '±', '=', '+', '-', '*', '/', '\\', '<', '>', '~', '°', '_', '`', '´', '¨', '(', ')', '[', ']', '{', '}' ];
+    static punctuations = [ '.', ',', ';', ':', '?', '!', '"', '\'', '«', '»', '“', '„' ];
     /**
      * A shorthand function to extract a certain number of character from a string. 
      * @param {string} content The string where we want to extract content from.

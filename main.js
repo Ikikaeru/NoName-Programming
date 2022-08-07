@@ -1,7 +1,3 @@
-const controls = [ '\n' ];
-const whitespaces = [ ' ', '\t' ];
-const symbols = [ '§', '@', '¥', '€', '¬', '&', '|', '#', '^', '*', '$', '%', '±', '=', '+', '-', '*', '/', '\\', '<', '>', '~', '°', '_', '`', '´', '¨', '(', ')', '[', ']', '{', '}' ];
-const punctuations = [ '.', ',', ';', ':', '?', '!', '"', '\'', '«', '»' ];
 const KEYWORDS = [
     'let', 'new', 'from', 'to', 'static', 'in', 'as', 'do',
     'inside', 'select', 'set', 'get', 'insert', 'delete',
@@ -186,14 +182,77 @@ const syntax = new SyntaxMaker(
     new SyntaxElement('Bracket', Pattern.simpleCharbox('', '[', ']')),
     new SyntaxElement('Curly Bracket', Pattern.simpleCharbox('', '{', '}')),
     new SyntaxElement('Number',
-        Pattern.number(),
+        new Pattern({
+            name: 'Number',
+            defaultValue: 0,
+            isPattern: (i, c, txt) => {
+                let isDecimal = c === '.' && Txt.digits.includes(Txt.extract(txt, i + 1, 1));
+                return Txt.digits.includes(c) || isDecimal;
+            },
+            fetch: (index, c, txt) => {
+                let result = {
+                    name: 'Number',
+                    content: '',
+                    lastIndex: index
+                };
+                let alreadyDecimal = false;
+                for(let i = index; i < txt.length; i++)
+                {
+                    if(!Txt.digits.includes(txt[i])) // Not a digit?
+                    {
+                        if(!alreadyDecimal && txt[i] === '.') // It's decimal number
+                        {
+                            alreadyDecimal = true; // We defined it as decimal to skip problems in case of multiple decimal marks
+                            if(result.content.length == 0) // .5 as example
+                            {
+                                result.content = `0.`; // 0.5 now
+                            }
+                            else
+                            {
+                                result.content = `${result.content}.`; // xxx.yyy
+                            }
+                            result.lastIndex = i; // Assign the last index
+                            continue;
+                        }
+                        result.lastIndex = i - 1; // Since this index is something we shouldn't bother with, let him tested by something else
+                        break;
+                    }
+                    result.lastIndex = i; // Assign the last index
+                    result.content = `${result.content}${txt[i]}`;
+                }
+                return result;
+            }
+        }),
         (content, toAdd) => {
             let encoded = Txt.HTMLEncode(toAdd);
             return `${content}<span class="number">${encoded}</span>`;
         }
     ),
-    new SyntaxElement('Word',
-        Pattern.word(),
+    new SyntaxElement('Variable',
+        new Pattern({
+            defaultValue: '',
+            isPattern: (i, c, txt) => {
+                return Txt.variables.includes(c) || c === '$' || c === '_';
+            },
+            fetch: (index, c, txt) => {
+                let result = {
+                    name: 'Variable',
+                    content: '',
+                    lastIndex: index
+                };
+                for(let i = index; i < txt.length; i++)
+                {
+                    if(!Txt.variables.includes(txt[i])) // Not a letter?
+                    {
+                        result.lastIndex = i - 1; // Since this index is something we shouldn't bother with, let him tested by something else
+                        break;
+                    }
+                    result.lastIndex = i; // Assign the last index
+                    result.content = `${result.content}${txt[i]}`;
+                }
+                return result;
+            }
+        }),
         (content, toAdd) => {
             let encoded = Txt.HTMLEncode(toAdd);
             if(KEYWORDS.includes(toAdd))
@@ -214,13 +273,17 @@ const syntax = new SyntaxMaker(
             }
         }
     ),
-    new SyntaxElement('Punctuation', Pattern.simpleChar('', (c) => { return punctuations.includes(c); })),
-    new SyntaxElement('Symbol', Pattern.simpleChar('', (c) => { return symbols.includes(c); })),
+    new SyntaxElement('Word',
+        Pattern.word(),
+        (content, toAdd) => `${content}<span class="word">${Txt.HTMLEncode(toAdd)}</span>`
+    ),
+    new SyntaxElement('Punctuation', Pattern.simpleChar('', (c) => { return Txt.punctuations.includes(c); })),
+    new SyntaxElement('Symbol', Pattern.simpleChar('', (c) => { return Txt.symbols.includes(c); })),
     new SyntaxElement('Whitespaces', new Pattern({ defaultValue: ' ',
-            isPattern: (i, c, txt) => { return whitespaces.includes(c); },
+            isPattern: (i, c, txt) => { return Txt.whitespaces.includes(c); },
             fetch: (index, c, txt) => {
                 let result = Txt.extractFromUntil(txt, index, (c) => {
-                    return whitespaces.includes(c);
+                    return Txt.whitespaces.includes(c);
                 });
                 let spaceResult = result.value;
                 return {
@@ -232,7 +295,7 @@ const syntax = new SyntaxMaker(
         }),
         (content, toAdd) => `${content}${toAdd.replaceAll(' ', '&nbsp;')}`
     ),
-    new SyntaxElement('Controls', Pattern.simpleChar('Controls', (c) => { return controls.includes(c); }), (content, toAdd) => `${content}${toAdd}`),
+    new SyntaxElement('Controls', Pattern.simpleChar('Controls', (c) => { return Txt.controls.includes(c); }), (content, toAdd) => `${content}${toAdd}`),
 );
 
 
