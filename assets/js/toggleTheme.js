@@ -1,53 +1,38 @@
 
 const toggleTheme = (theme) => {
-    const html = document.querySelector('html');
-    const body = document.querySelector('body');
-    const editor = document.querySelector('.editor');
-    const editor_linenumber = document.querySelector('.editor_linenumber');
-    const editor_container_backdrop = document.querySelector('.editor_container_backdrop');
-    const editor_container_inputarea = document.querySelector('.editor_container_inputarea');
-    if(theme === 'light') // Switch to dark mode
+    const swap = (add, rem) => {
+        const everyColoredElements = [
+            'html',
+            'body',
+            '.editor',
+            '.editor_linenumber',
+            '.editor_container_backdrop',
+            '.editor_container_inputarea',
+            '.mode-toggle'
+        ];
+        const swap2 = (name, add, rem) => {
+            let element = document.querySelector(name);
+            element.classList.add(add);
+            element.classList.remove(rem);
+        }
+        for(const e of everyColoredElements)
+        {
+            swap2(e, add, rem);
+        }
+    };
+    if(theme === 'dark')
     {
-        // HTML
-        html.classList.remove('light');
-        html.classList.add('dark');
-        // BODY
-        body.classList.remove('light');
-        body.classList.add('dark');
-        // EDITOR
-        editor.classList.remove('light');
-        editor.classList.add('dark');
-        // EDITOR LINE NUMBER
-        editor_linenumber.classList.remove('light');
-        editor_linenumber.classList.add('dark');
-        // EDITOR CONTAINER BACKDROP
-        editor_container_backdrop.classList.remove('light');
-        editor_container_backdrop.classList.add('dark');
-        // EDITOR CONTAINER INPUTAREA
-        editor_container_inputarea.classList.remove('light');
-        editor_container_inputarea.classList.add('dark');
+        swap('light', 'dark');
+        return 'light';
     }
-    else // Switch to light mode
-    {
-        // HTML
-        html.classList.remove('dark');
-        html.classList.add('light');
-        // BODY
-        body.classList.remove('dark');
-        body.classList.add('light');
-        // EDITOR
-        editor.classList.remove('dark');
-        editor.classList.add('light');
-        // EDITOR LINE NUMBER
-        editor_linenumber.classList.remove('dark');
-        editor_linenumber.classList.add('light');
-        // EDITOR CONTAINER BACKDROP
-        editor_container_backdrop.classList.remove('dark');
-        editor_container_backdrop.classList.add('light');
-        // EDITOR CONTAINER INPUTAREA
-        editor_container_inputarea.classList.remove('dark');
-        editor_container_inputarea.classList.add('light');
-    }
+    swap('dark', 'light');
+    return 'dark';
 }
-let theme = 'light';
-toggleTheme(theme);
+let GLOBAL_THEME = 'light';
+GLOBAL_THEME = toggleTheme(GLOBAL_THEME);
+let eventListen = document.querySelector('.mode-toggle');
+eventListen.innerHTML = GLOBAL_THEME === 'dark' ? 'Light theme' : 'Dark theme';
+eventListen.addEventListener('click', (e) => {
+    GLOBAL_THEME = toggleTheme(GLOBAL_THEME);
+    eventListen.innerHTML = GLOBAL_THEME === 'dark' ? 'Light theme' : 'Dark theme';
+});

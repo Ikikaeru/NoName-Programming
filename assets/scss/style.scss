@@ -10,3 +10,10 @@ body {
 @import 'scrollBar';
 @import 'highlighting';
 @import 'textEditor';
+
+.mode-toggle {
+    padding: 4px;
+    margin: 3px;
+    border-radius: 15px;
+    cursor: pointer;
+}

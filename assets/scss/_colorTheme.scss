@@ -33,6 +33,14 @@ $theme_scrollbar_hovercolor: 119; // 119
         background-color: darkLight($theme, $theme_linear_bgcolor);
         color: darkLight($theme, $theme_linear_color);
     }
+    .mode-toggle.#{$theme} {
+        color: darkLight($theme, $theme_linear_color);
+        background-color: darkLight($theme, $theme_oddLine_bgcolor);
+        border: 2px solid darkLight($theme, $theme_linear_bgcolor * 3);
+        &:hover {
+            background-color: darkLight($theme, $theme_linear_bgcolor * 3);
+        }
+    }
     .editor.#{$theme} {
         border: medium double darkLight($theme, $theme_linear_bgcolor * 3);
     }
