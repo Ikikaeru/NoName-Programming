@@ -349,6 +349,7 @@ userInput.addEventListener('keydown', event => {
         let move = 0;
         if(event.shiftKey)
         {
+            let lastLineIndex = -1;
             for(let i = carretContent.length - 1; i >= carretContent.length - tabLength && i >= 0; i--)
             {
                 if(carretContent[i] !== ' ')
@@ -356,6 +357,9 @@ userInput.addEventListener('keydown', event => {
                     if(carretContent[i] !== '\n')
                     {
                         move--;
+                    }
+                    else {
+                        lastLineIndex = i;
                     }
                     break;
                 }
@@ -365,7 +369,39 @@ userInput.addEventListener('keydown', event => {
             {
                 move = 0;
             }
-            userInput.value = userInput.value.substring(0, caretPos - move) + userInput.value.substring(caretPos, userInput.value.length);
+            if(move == 0)
+            {
+                for(let i = carretContent.length - 1; i >= 0; i--)
+                {
+                    if(carretContent[i] === '\n')
+                    {
+                        lastLineIndex = i;
+                        break;
+                    }
+                }
+                let lastCarretIndex = -1;
+                for(let i = lastLineIndex + 1; i < carretContent.length; i++)
+                {
+                    if(carretContent[i] !== ' ')
+                    {
+                        lastCarretIndex = i;
+                        break;
+                    }
+                    move++;
+                }
+                if(move > tabLength)
+                {
+                    move = tabLength;
+                }
+                let begin = userInput.value.substring(0, lastLineIndex + 1);
+                let mid = userInput.value.substring(lastLineIndex + move + 1, caretPos);
+                let end = userInput.value.substring(caretPos, userInput.value.length);
+                userInput.value = `${begin}${mid}${end}`;
+            }
+            else
+            {
+                userInput.value = userInput.value.substring(0, caretPos - move) + userInput.value.substring(caretPos, userInput.value.length);
+            }
             newCaretPosition = caretPos - move;
         }
         else
